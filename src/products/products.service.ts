@@ -1,36 +1,28 @@
 import { Injectable } from '@nestjs/common';
 import { CreateProductDto } from './dto/product.dto'
+import { InjectModel } from '@nestjs/mongoose';
+import * as mongoose from 'mongoose';
+import { Products } from 'src/schemas/product.schema';
 
 @Injectable()
 export class ProductsService {
-    private products = [
-        {
-            id: 1,
-            name: "pizza",
-            category: "food",
-            price: 2000
-        }
-    ];
 
-    findAll(category) {
-        if (category) {
-            return this.products.filter(pro => pro.category === category)
-        }
-        return this.products
+    constructor(
+        @InjectModel(Products.name) private readonly productModel: mongoose.Model<Products>,
+      ) {}
+
+    async findAll(category?: string): Promise<Products[]> {
+        if(category){
+            return this.productModel.find({ category }).exec();
+         }
+         return this.productModel.find().exec();
     }
 
-    findOne(id: number){
-        const product = this.products.find(pro => pro.id == id)
-        return product
+    async findOne(id: string): Promise<Products | null>{
+        return this.productModel.findById(id).exec()
     }
 
-    create(product : CreateProductDto){
-        const productByHighestId = [...this.products].sort((a, b) => b.id - a.id)
-        const newProduct = {
-            id: productByHighestId[0].id + 1,
-            ...product
-        }
-        this.products.push(newProduct)
-        return newProduct
+    async create(product : CreateProductDto){
+        return await this.productModel.create(product)
     }
 }
