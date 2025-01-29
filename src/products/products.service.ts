@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { UpdateProductDto } from './dto/update.dto'
 import { CreateProductDto } from './dto/product.dto'
 import { InjectModel } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
@@ -13,16 +14,20 @@ export class ProductsService {
 
     async findAll(category?: string): Promise<Products[]> {
         if(category){
-            return this.productModel.find({ category }).exec();
+            return this.productModel.find({ category });
          }
-         return this.productModel.find().exec();
+         return this.productModel.find();
     }
 
     async findOne(id: string): Promise<Products | null>{
-        return this.productModel.findById(id).exec()
+        return this.productModel.findById(id).exec();
     }
 
     async create(product : CreateProductDto){
-        return await this.productModel.create(product)
+        return this.productModel.create(product)
+    }
+
+    async update(id: string, params : UpdateProductDto){
+        return this.productModel.findByIdAndUpdate(id, params, { new: true });
     }
 }
