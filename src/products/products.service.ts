@@ -10,24 +10,28 @@ export class ProductsService {
 
     constructor(
         @InjectModel(Products.name) private readonly productModel: mongoose.Model<Products>,
-      ) {}
+    ) { }
 
     async findAll(category?: string): Promise<Products[]> {
-        if(category){
+        if (category) {
             return this.productModel.find({ category });
-         }
-         return this.productModel.find();
+        }
+        return this.productModel.find();
     }
 
-    async findOne(id: string): Promise<Products | null>{
+    async findOne(id: string): Promise<Products | null> {
         return this.productModel.findById(id).exec();
     }
 
-    async create(product : CreateProductDto){
+    async create(product: CreateProductDto) {
         return this.productModel.create(product)
     }
 
-    async update(id: string, params : UpdateProductDto){
+    async update(id: string, params: UpdateProductDto) {
         return this.productModel.findByIdAndUpdate(id, params, { new: true });
+    }
+
+    async delete(id: string) {
+        return this.productModel.findByIdAndDelete(id);
     }
 }
