@@ -1,33 +1,33 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Types } from 'mongoose';
+import { Document } from 'mongoose';
 
-export enum Category{
-    FOODS = 'foods',
-    FETES = 'fétes',
-    MEDICAL = 'médical',
-    BEAUTY = 'beauty',
-    SPORT = 'sport',
-    GAMING = 'gaming'
+export enum Category {
+  FOODS = 'foods',
+  FETES = 'fétes',
+  MEDICAL = 'médical',
+  BEAUTY = 'beauty',
+  SPORT = 'sport',
+  GAMING = 'gaming'
 }
 
 @Schema({
-    timestamps: true,
-  })
-  export class Products {
-    @Prop()
-    title: string;
-  
-    @Prop()
-    description: string;
-  
-    @Prop()
-    Quntity: string;
-  
-    @Prop()
-    price: number;
-  
-    @Prop()
-    category: Category;
-  }
+  timestamps: true,
+})
+export class Products extends Document {
+  @Prop()
+  title: string;
 
-  export const ProductSchema = SchemaFactory.createForClass(Products);
+  @Prop()
+  description: string;
+
+  @Prop()
+  quntity: string;
+
+  @Prop()
+  price: number;
+
+  @Prop()
+  category: Category;
+}
+
+export const ProductSchema = SchemaFactory.createForClass(Products);

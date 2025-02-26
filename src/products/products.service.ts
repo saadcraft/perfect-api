@@ -20,7 +20,7 @@ export class ProductsService {
     }
 
     async findOne(id: string): Promise<Products | null> {
-        return this.productModel.findById(id).exec();
+        return this.productModel.findById(id);
     }
 
     async create(product: CreateProductDto) {
