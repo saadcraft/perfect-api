@@ -1,9 +1,10 @@
-import { Body, Controller, Delete, Get, HttpException, Param, Patch, Post, Query, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpException, Param, Patch, Post, Query, UseGuards, ValidationPipe } from '@nestjs/common';
 import { ProductsService } from "./products.service"
 import { CreateProductDto } from "./dto/product.dto"
-import { Products } from 'src/schemas/product.schema';
+import { Products } from '../schemas/product.schema';
 import { UpdateProductDto } from './dto/update.dto';
 import mongoose from 'mongoose';
+import { JwtAuthGuard } from '../users/jwt/jwt-auth.guard';
 
 @Controller('products')
 export class ProductsController {
@@ -32,6 +33,7 @@ export class ProductsController {
         return this.productsService.update(id, proUpdate)
     }
 
+    @UseGuards(JwtAuthGuard)
     @Delete(':id')
     async delete(@Param('id') id: string) {
         const isValid = mongoose.Types.ObjectId.isValid(id);

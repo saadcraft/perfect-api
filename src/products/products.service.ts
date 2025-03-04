@@ -3,7 +3,7 @@ import { UpdateProductDto } from './dto/update.dto'
 import { CreateProductDto } from './dto/product.dto'
 import { InjectModel } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
-import { Products } from 'src/schemas/product.schema';
+import { Products } from '../schemas/product.schema';
 
 @Injectable()
 export class ProductsService {
@@ -24,7 +24,7 @@ export class ProductsService {
     }
 
     async create(product: CreateProductDto) {
-        return this.productModel.create(product)
+        return this.productModel.create(product);
     }
 
     async update(id: string, params: UpdateProductDto) {
