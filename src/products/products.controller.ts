@@ -5,6 +5,9 @@ import { Products } from '../schemas/product.schema';
 import { UpdateProductDto } from './dto/update.dto';
 import mongoose from 'mongoose';
 import { JwtAuthGuard } from '../users/jwt/jwt-auth.guard';
+import { Roles } from 'src/users/auth/auth.decorator';
+import { Role } from 'src/schemas/user.schema';
+import { RolesGuard } from 'src/users/auth/role.guard';
 
 @Controller('products')
 export class ProductsController {
@@ -21,11 +24,15 @@ export class ProductsController {
         return this.productsService.findOne(id)
     }
 
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
     @Post() //POST /products
     create(@Body(ValidationPipe) product: CreateProductDto) {
         return this.productsService.create(product)
     }
 
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
     @Patch(':id') //PATCH /products
     update(@Param('id') id: string, @Body(ValidationPipe) proUpdate: UpdateProductDto) {
         const isValid = mongoose.Types.ObjectId.isValid(id);
@@ -33,7 +40,8 @@ export class ProductsController {
         return this.productsService.update(id, proUpdate)
     }
 
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
     @Delete(':id')
     async delete(@Param('id') id: string) {
         const isValid = mongoose.Types.ObjectId.isValid(id);
