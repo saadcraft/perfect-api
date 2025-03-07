@@ -5,6 +5,15 @@ import { InjectModel } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { Products } from '../schemas/product.schema';
 
+export type ProductRequest = {
+    total: number;
+    page: number;
+    totalPages: number;
+    result: Products[];
+}
+
+const limit = 4;
+
 @Injectable()
 export class ProductsService {
 
@@ -12,11 +21,26 @@ export class ProductsService {
         @InjectModel(Products.name) private readonly productModel: mongoose.Model<Products>,
     ) { }
 
-    async findAll(category?: string): Promise<Products[]> {
+    async findAll(category?: string, page?: number): Promise<ProductRequest> {
+        const skip = (page ? page - 1 : 0) * limit; // Calculate the offset
         if (category) {
-            return this.productModel.find({ category });
+            const data = await this.productModel.find({ category }).skip(skip).limit(limit);
+            const total = await this.productModel.countDocuments({ category });
+            return {
+                total,
+                page: Number(page) || 1,
+                totalPages: Math.ceil(total / limit),
+                result: data,
+            }
         }
-        return this.productModel.find();
+        const total = await this.productModel.countDocuments();
+        const data = await this.productModel.find().skip(skip).limit(limit); // Calculate the offset;
+        return {
+            total,
+            page: Number(page) || 1,
+            totalPages: Math.ceil(total / limit),
+            result: data,
+        }
     }
 
     async findOne(id: string): Promise<Products | null> {

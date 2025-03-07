@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, HttpException, Param, Patch, Post, Query, UseGuards, ValidationPipe } from '@nestjs/common';
-import { ProductsService } from "./products.service"
+import { ProductsService, ProductRequest } from "./products.service"
 import { CreateProductDto } from "./dto/product.dto"
 import { Products } from '../schemas/product.schema';
 import { UpdateProductDto } from './dto/update.dto';
@@ -15,12 +15,12 @@ export class ProductsController {
     constructor(private readonly productsService: ProductsService) { }
 
     @Get() // GET /products
-    findAll(@Query('category') category: string): Promise<Products[]> {
-        return this.productsService.findAll(category)
+    findAll(@Query('category') category: string, @Query('page') page: number): Promise<ProductRequest> {
+        return this.productsService.findAll(category, page)
     }
 
     @Get(':id') // GET /products/:id
-    findOne(@Param('id') id: string) {
+    findOne(@Param('id') id: string): Promise<Products | null> {
         return this.productsService.findOne(id)
     }
 
