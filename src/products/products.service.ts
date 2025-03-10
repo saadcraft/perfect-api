@@ -21,20 +21,19 @@ export class ProductsService {
         @InjectModel(Products.name) private readonly productModel: mongoose.Model<Products>,
     ) { }
 
-    async findAll(category?: string, page?: number): Promise<ProductRequest> {
+    async findAll(filters: { title?: string; category?: string }, page?: number): Promise<ProductRequest> {
         const skip = (page ? page - 1 : 0) * limit; // Calculate the offset
-        if (category) {
-            const data = await this.productModel.find({ category }).skip(skip).limit(limit);
-            const total = await this.productModel.countDocuments({ category });
-            return {
-                total,
-                page: Number(page) || 1,
-                totalPages: Math.ceil(total / limit),
-                result: data,
-            }
+        const query: { [key: string]: any } = {};
+        if (filters.category && filters.category.trim()) {
+            query.category = filters.category.trim();
         }
-        const total = await this.productModel.countDocuments();
-        const data = await this.productModel.find().skip(skip).limit(limit); // Calculate the offset;
+        if (filters.title && filters.title.trim()) {
+            const searchTerm = filters.title.trim();
+            const regexPattern = searchTerm.split('').join('.*'); // Basic approximation for fuzzy matching
+            query.title = { $regex: regexPattern, $options: 'i' };
+        }
+        const data = await this.productModel.find(query).skip(skip).limit(limit);
+        const total = await this.productModel.countDocuments(query);
         return {
             total,
             page: Number(page) || 1,

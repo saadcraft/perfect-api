@@ -15,8 +15,8 @@ export class ProductsController {
     constructor(private readonly productsService: ProductsService) { }
 
     @Get() // GET /products
-    findAll(@Query('category') category: string, @Query('page') page: number): Promise<ProductRequest> {
-        return this.productsService.findAll(category, page)
+    findAll(@Query('category') category: string, @Query('title') title: string, @Query('page') page: number): Promise<ProductRequest> {
+        return this.productsService.findAll({ title, category }, page);
     }
 
     @Get(':id') // GET /products/:id
