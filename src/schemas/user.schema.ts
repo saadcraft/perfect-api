@@ -24,7 +24,7 @@ export class Users extends Document {
     @Prop({ required: true }) // Password is required (will be hashed before saving)
     password: string;
 
-    @Prop({ default: 'user' }) // Role of the user (e.g., 'user', 'admin')
+    @Prop({ default: 'USER' }) // Role of the user (e.g., 'user', 'admin')
     role: Role;
 
     @Prop({ default: false }) // Indicates if the user's email is verified

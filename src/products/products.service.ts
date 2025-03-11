@@ -3,7 +3,16 @@ import { UpdateProductDto } from './dto/update.dto'
 import { CreateProductDto } from './dto/product.dto'
 import { InjectModel } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
-import { Products } from 'src/schemas/product.schema';
+import { Products } from '../schemas/product.schema';
+
+export type ProductRequest = {
+    total: number;
+    page: number;
+    totalPages: number;
+    result: Products[];
+}
+
+const limit = 4;
 
 @Injectable()
 export class ProductsService {
@@ -12,11 +21,25 @@ export class ProductsService {
         @InjectModel(Products.name) private readonly productModel: mongoose.Model<Products>,
     ) { }
 
-    async findAll(category?: string): Promise<Products[]> {
-        if (category) {
-            return this.productModel.find({ category });
+    async findAll(filters: { title?: string; category?: string }, page?: number): Promise<ProductRequest> {
+        const skip = (page ? page - 1 : 0) * limit; // Calculate the offset
+        const query: { [key: string]: any } = {};
+        if (filters.category && filters.category.trim()) {
+            query.category = filters.category.trim();
         }
-        return this.productModel.find();
+        if (filters.title && filters.title.trim()) {
+            const searchTerm = filters.title.trim();
+            const regexPattern = searchTerm.split('').join('.*'); // Basic approximation for fuzzy matching
+            query.title = { $regex: regexPattern, $options: 'i' };
+        }
+        const data = await this.productModel.find(query).skip(skip).limit(limit);
+        const total = await this.productModel.countDocuments(query);
+        return {
+            total,
+            page: Number(page) || 1,
+            totalPages: Math.ceil(total / limit),
+            result: data,
+        }
     }
 
     async findOne(id: string): Promise<Products | null> {
@@ -24,7 +47,7 @@ export class ProductsService {
     }
 
     async create(product: CreateProductDto) {
-        return this.productModel.create(product)
+        return this.productModel.create(product);
     }
 
     async update(id: string, params: UpdateProductDto) {
