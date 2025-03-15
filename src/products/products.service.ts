@@ -12,7 +12,7 @@ export type ProductRequest = {
     result: Products[];
 }
 
-const limit = 4;
+const limit = 10;
 
 @Injectable()
 export class ProductsService {
@@ -32,7 +32,7 @@ export class ProductsService {
             const regexPattern = searchTerm.split('').join('.*'); // Basic approximation for fuzzy matching
             query.title = { $regex: regexPattern, $options: 'i' };
         }
-        const data = await this.productModel.find(query).skip(skip).limit(limit);
+        const data = await this.productModel.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit);
         const total = await this.productModel.countDocuments(query);
         return {
             total,

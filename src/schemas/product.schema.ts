@@ -21,7 +21,7 @@ export class Products extends Document {
   description: string;
 
   @Prop()
-  quntity: string;
+  quntity: number;
 
   @Prop()
   price: number;

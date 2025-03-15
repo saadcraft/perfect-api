@@ -4,6 +4,7 @@ import {
     ArgumentsHost,
     HttpException,
     Logger,
+    BadRequestException,
 } from '@nestjs/common';
 
 @Catch(HttpException)
@@ -19,6 +20,11 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         this.logger.error(
             `${request.method} ${request.url} ${status} - Error: ${exception.message}`,
         );
+
+        if (exception instanceof BadRequestException) {
+            const validationErrors = exception.getResponse();
+            return response.status(status).json(validationErrors);
+        }
 
         response.status(status).json({
             statusCode: status,

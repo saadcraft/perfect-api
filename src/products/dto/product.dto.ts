@@ -9,11 +9,15 @@ export class CreateProductDto {
     @IsOptional()
     description: string;
 
-    @IsEnum(['foods','fétes','médical','beauty','sport','gaming'], {
+    @IsEnum(['foods', 'fétes', 'médical', 'beauty', 'sport', 'gaming'], {
         message: 'Valid category required'
     })
     category: string;
 
     @IsNumber()
     price: number;
+
+    @IsOptional()
+    @IsNumber()
+    quntity: number;
 }
