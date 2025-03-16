@@ -3,19 +3,22 @@ import { IsEnum, IsNumber, IsOptional, IsString } from "class-validator";
 export class UpdateProductDto {
     @IsOptional()
     @IsString()
-    title: string;
+    title?: string;
 
     @IsOptional()
     @IsString()
-    description: string;
+    description?: string;
 
-    @IsEnum(['foods','fétes','médical','beauty','sport','gaming'], {
+    @IsEnum(['foods', 'fétes', 'médical', 'beauty', 'sport', 'gaming'], {
         message: 'Valid category required'
     })
     @IsOptional()
-    category: string;
+    category?: string;
 
     @IsOptional()
     @IsNumber()
-    price: number;
+    price?: number;
+
+    @IsOptional()
+    images?: string[]
 }

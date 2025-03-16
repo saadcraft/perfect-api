@@ -46,8 +46,8 @@ export class ProductsService {
         return this.productModel.findById(id);
     }
 
-    async create(product: CreateProductDto) {
-        return this.productModel.create(product);
+    async create(product: CreateProductDto, images?: string[]) {
+        return this.productModel.create({ ...product, images });
     }
 
     async update(id: string, params: UpdateProductDto) {

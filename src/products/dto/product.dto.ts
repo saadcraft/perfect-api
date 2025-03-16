@@ -2,7 +2,7 @@ import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-valida
 
 export class CreateProductDto {
     @IsString()
-    @IsNotEmpty()
+    @IsNotEmpty({ message: "le titre ne doit pas être vide" })
     title: string;
 
     @IsString()
