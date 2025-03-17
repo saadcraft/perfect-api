@@ -42,8 +42,11 @@ export class UsersService {
             if (isMatch) {
                 const userObject = user.toObject();
                 const { password, ...result } = userObject;
-                console.log(result)
+                // console.log(result)
                 return {
+                    id: userObject._id,
+                    username: userObject.username,
+                    email: userObject.email,
                     access_token: this.jwtService.sign(result),
                 };
             }

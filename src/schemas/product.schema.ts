@@ -21,13 +21,16 @@ export class Products extends Document {
   description: string;
 
   @Prop()
-  quntity: string;
+  quntity: number;
 
   @Prop()
   price: number;
 
   @Prop()
   category: Category;
+
+  @Prop({ type: [String] }) // Array of image filenames
+  images: string[];
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Products);
