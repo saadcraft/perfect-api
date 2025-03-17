@@ -27,7 +27,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         }
 
         response.status(status).json({
-            statusCode: status,
+            status: status,
             message: exception.message,
             error: exception.getResponse()['error'] || 'Unknown Error',
         });

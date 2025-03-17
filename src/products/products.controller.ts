@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpException, Param, Patch, Post, Query, UploadedFiles, UseGuards, UseInterceptors, ValidationPipe } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, HttpException, Param, Patch, Post, Query, UploadedFiles, UseGuards, UseInterceptors, ValidationPipe } from '@nestjs/common';
 import { ProductsService, ProductRequest } from "./products.service"
 import { CreateProductDto } from "./dto/product.dto"
 import { Products } from '../schemas/product.schema';
@@ -36,8 +36,15 @@ export class ProductsController {
     )
     async create(
         @Body(ValidationPipe) product: CreateProductDto,
-        @UploadedFiles() files: { images?: Express.Multer.File[] },
+        @UploadedFiles() files?: { images?: Express.Multer.File[] },
     ) {
+        if (!files || !files.images || files.images.length === 0) {
+            throw new BadRequestException({
+                status: 400,
+                message: 'At least one image is required',
+                error: 'Bad Request',
+            });
+        }
         const images = files.images?.map((file) => file.path) || [];
         try {
             const newProduct = await this.productsService.create(product);
@@ -56,7 +63,11 @@ export class ProductsController {
             await this.productsService.update(newProduct.id, { images: imagePaths });
             return { ...newProduct.toObject(), images: imagePaths };
         } catch (error) {
-            throw error;
+            throw new BadRequestException({
+                status: 500,
+                message: error,
+                error: 'Bad Request',
+            });
         }
     }
 
