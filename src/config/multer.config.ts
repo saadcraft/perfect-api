@@ -11,7 +11,14 @@ export const multerOptions = {
     },
     filename: (req, file, cb) => {
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-      cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
+      const generatedFilename = `${uniqueSuffix}${extname(file.originalname)}`;
+
+      if (!req.body.Images) {
+        req.body.Images = [];
+      }
+      req.body.Images.push(file.originalname);
+
+      cb(null, generatedFilename);
     },
   }),
   fileFilter: (req, file, cb) => {

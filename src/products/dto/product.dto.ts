@@ -1,5 +1,5 @@
 import { Transform } from "class-transformer";
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class CreateProductDto {
     @IsString()
@@ -20,6 +20,15 @@ export class CreateProductDto {
     price: number;
 
     @IsOptional()
+    @Transform(({ value }) => Number(value))
     @IsNumber()
     quntity: number;
+
+    @IsArray()
+    @IsOptional() // Images may be optional initially before upload
+    images?: string[];
+
+    @IsString()
+    @IsOptional()
+    primaryImage?: string; // Store primary image path
 }

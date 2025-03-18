@@ -1,4 +1,20 @@
-import { BadRequestException, Body, Controller, Delete, Get, HttpException, Param, Patch, Post, Query, UploadedFiles, UseGuards, UseInterceptors, ValidationPipe } from '@nestjs/common';
+import {
+    BadRequestException,
+    Body,
+    Controller,
+    Delete,
+    Get,
+    HttpException,
+    Param,
+    Patch,
+    Post,
+    Query,
+    Req,
+    UploadedFiles,
+    UseGuards,
+    UseInterceptors,
+    ValidationPipe
+} from '@nestjs/common';
 import { ProductsService, ProductRequest } from "./products.service"
 import { CreateProductDto } from "./dto/product.dto"
 import { Products } from '../schemas/product.schema';
@@ -45,22 +61,34 @@ export class ProductsController {
                 error: 'Bad Request',
             });
         }
-        const images = files.images?.map((file) => file.path) || [];
         try {
+            const images = files.images.map((file) => ({
+                path: file.path,
+                originalFilename: file.originalname, // Store the original filename
+            }));
             const newProduct = await this.productsService.create(product);
 
             const productDir = `./uploads/products/${newProduct._id}`;
             fs.mkdirSync(productDir, { recursive: true });
 
-            const imagePaths = images.map((oldPath) => {
-                const filename = path.basename(oldPath);
+            const imagePaths = images.map(({ path: oldPath, originalFilename }) => {
+                const filename = path.basename(oldPath); // Get the generated filename
                 const newPath = path.join(productDir, filename);
-                fs.renameSync(oldPath, newPath); // Write buffer to file
+                fs.renameSync(oldPath, newPath); // Move the file to the new directory
 
-                return `/uploads/products/${newProduct._id}/${filename}`;
+                return {
+                    newPath: `/uploads/products/${newProduct._id}/${filename}`,
+                    originalFilename, // Keep the original filename for reference
+                };
             });
 
-            await this.productsService.update(newProduct.id, { images: imagePaths });
+            const primaryImage = imagePaths.find((img) => img.originalFilename === product.primaryImage)?.newPath || imagePaths[0].newPath;
+
+            console.log(imagePaths.map((pre) => pre.originalFilename))
+
+
+
+            await this.productsService.update(newProduct.id, { images: imagePaths.map((img) => img.newPath), primaryImage });
             return { ...newProduct.toObject(), images: imagePaths };
         } catch (error) {
             throw new BadRequestException({

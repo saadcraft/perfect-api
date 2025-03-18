@@ -1,8 +1,8 @@
 import {
-  // MiddlewareConsumer, 
+  // MiddlewareConsumer,
   Module,
   // NestModule, 
-  // RequestMethod 
+  // RequestMethod
 } from '@nestjs/common';
 import { ProductsController } from './products.controller';
 import { ProductsService } from './products.service';
@@ -22,7 +22,6 @@ export class ProductsModule { // Add implements NestModule for apply middleware
   //     .apply(LoggerMiddleware)
   //     .forRoutes(
   //       { path: 'products', method: RequestMethod.POST },
-  //       { path: 'products/{*splat}', method: RequestMethod.DELETE },
   //     )
   // }
 }

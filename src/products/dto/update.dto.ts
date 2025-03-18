@@ -21,4 +21,7 @@ export class UpdateProductDto {
 
     @IsOptional()
     images?: string[]
+
+    @IsOptional()
+    primaryImage?: string
 }

@@ -31,6 +31,9 @@ export class Products extends Document {
 
   @Prop({ type: [String] }) // Array of image filenames
   images: string[];
+
+  @Prop()
+  primaryImage: string;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Products);
