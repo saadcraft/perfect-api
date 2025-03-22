@@ -25,4 +25,9 @@ export class UsersController {
         return this.usersService.getUser(id)
     }
 
+    @Post('refresh')
+    refreshUser(@Body() body: { refresh_token: string }) {
+        return this.usersService.refreshUser(body.refresh_token)
+    }
+
 }

@@ -6,10 +6,11 @@ import { UsersModule } from './users/users.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 
+
+
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: '.env',
       isGlobal: true,
     }),
     ServeStaticModule.forRoot({
@@ -18,7 +19,8 @@ import { join } from 'path';
     }),
     MongooseModule.forRoot(process.env.DB_URI || ""),
     ProductsModule,
-    UsersModule],
+    UsersModule,
+  ],
   controllers: [],
   providers: [],
 })
