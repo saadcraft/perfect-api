@@ -72,7 +72,7 @@ export class UsersService {
             const newAccessToken = this.jwtService.sign(payload);
             const newRefreshToken = this.jwtService.sign(payload, {
                 secret: process.env.REFRESH_SECRET_KEY || "DEFAULT=c12fa829caac7fa815da4215ec13c8a2",
-                expiresIn: '20s',
+                expiresIn: '7d',
             });
 
             return { access_token: newAccessToken, refresh_token: newRefreshToken };
