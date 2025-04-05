@@ -1,4 +1,5 @@
-import { IsEnum, IsNumber, IsOptional, IsString } from "class-validator";
+import { Transform } from "class-transformer";
+import { IsBoolean, IsEnum, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class UpdateProductDto {
     @IsOptional()
@@ -15,9 +16,14 @@ export class UpdateProductDto {
     @IsOptional()
     category?: string;
 
+    @Transform(({ value }) => value === 'true' || value === true)
+    @IsOptional()
+    @IsBoolean()
+    available?: boolean;
+
     @IsOptional()
     @IsNumber()
-    price?: number;
+    lowPrice?: number;
 
     @IsOptional()
     images?: string[]

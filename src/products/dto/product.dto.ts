@@ -1,5 +1,5 @@
 import { Transform, Type } from "class-transformer";
-import { ArrayMinSize, IsArray, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator";
+import { ArrayMinSize, IsArray, IsEnum, IsNotEmpty, isNumber, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator";
 import { AtLeastOneNotEmpty } from "src/config/at-least-one-not-empty.decorator";
 
 export class VariantsDto {
@@ -38,12 +38,16 @@ export class CreateProductDto {
 
     @IsString()
     @IsOptional()
-    description: string;
+    description?: string;
 
     @IsEnum(['foods', 'fétes', 'médical', 'beauty', 'sport', 'gaming'], {
         message: 'Valid category required'
     })
     category: string;
+
+    @IsNumber()
+    @IsOptional()
+    lowPrice?: number;
 
     @IsArray()
     @IsOptional() // Images may be optional initially before upload

@@ -67,10 +67,12 @@ export class ProductsController {
                 originalFilename: file.originalname, // Store the original filename
             }));
 
+            const lowest = product.variants.reduce((min, item) => item.price < min.price ? item : min);
+
             // const clientObject = JSON.parse(product.variants[]);
 
             // console.log(product)
-            const newProduct = await this.productsService.create(product);
+            const newProduct = await this.productsService.create({ ...product, lowPrice: lowest.price });
 
             const productDir = `./uploads/products/${newProduct._id}`;
             fs.mkdirSync(productDir, { recursive: true });
@@ -91,7 +93,6 @@ export class ProductsController {
             // console.log(imagePaths.map((pre) => pre.originalFilename))
 
 
-
             await this.productsService.update(newProduct.id, { images: imagePaths.map((img) => img.newPath), primaryImage });
             return { ...newProduct.toObject(), images: imagePaths };
         } catch (error) {
@@ -106,7 +107,14 @@ export class ProductsController {
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.ADMIN)
     @Patch(':id') //PATCH /products
-    update(@Param('id') id: string, @Body(ValidationPipe) proUpdate: UpdateProductDto) {
+    @UseInterceptors(
+        FileFieldsInterceptor([{ name: 'images', maxCount: 5 }], multerOptions),
+    )
+    update(@Param('id') id: string, @Body(ValidationPipe)
+    proUpdate: UpdateProductDto,
+        @UploadedFiles() files?: { images?: Express.Multer.File[] }
+    ) {
+        // console.log(proUpdate)
         const isValid = mongoose.Types.ObjectId.isValid(id);
         if (!isValid) throw new HttpException('Invalid ID', 400);
         return this.productsService.update(id, proUpdate)

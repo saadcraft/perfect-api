@@ -23,6 +23,9 @@ export class Products extends Document {
   @Prop({ required: true })
   category: Category;
 
+  @Prop({ required: true })
+  lowPrice: number;
+
   @Prop({ type: [String], required: true }) // Array of image filenames
   images: string[];
 
@@ -31,6 +34,9 @@ export class Products extends Document {
 
   @Prop({ type: Types.ObjectId, ref: "Variants" })
   variants: Types.ObjectId;
+
+  @Prop({ default: true })
+  available: boolean;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Products);
