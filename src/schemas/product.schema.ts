@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
 export enum Category {
   FOODS = 'foods',
@@ -14,26 +14,23 @@ export enum Category {
   timestamps: true,
 })
 export class Products extends Document {
-  @Prop()
+  @Prop({ required: true })
   title: string;
 
-  @Prop()
+  @Prop({ required: true })
   description: string;
 
-  @Prop()
-  quntity: number;
-
-  @Prop()
-  price: number;
-
-  @Prop()
+  @Prop({ required: true })
   category: Category;
 
-  @Prop({ type: [String] }) // Array of image filenames
+  @Prop({ type: [String], required: true }) // Array of image filenames
   images: string[];
 
-  @Prop()
+  @Prop({ required: true })
   primaryImage: string;
+
+  @Prop({ type: Types.ObjectId, ref: "Variants" })
+  variants: Types.ObjectId;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Products);

@@ -4,6 +4,7 @@ import { CreateProductDto } from './dto/product.dto'
 import { InjectModel } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { Products } from '../schemas/product.schema';
+import { Variants } from 'src/schemas/variants.shema';
 
 export type ProductRequest = {
     total: number;
@@ -19,6 +20,7 @@ export class ProductsService {
 
     constructor(
         @InjectModel(Products.name) private readonly productModel: mongoose.Model<Products>,
+        @InjectModel(Variants.name) private ProductVariants: mongoose.Model<Variants>,
     ) { }
 
     async findAll(filters: { title?: string; category?: string }, page?: number): Promise<ProductRequest> {
@@ -46,8 +48,9 @@ export class ProductsService {
         return this.productModel.findById(id);
     }
 
-    async create(product: CreateProductDto, images?: string[]) {
-        return this.productModel.create({ ...product, images });
+    async create({ variants, ...product }: CreateProductDto, images?: string[]) {
+        const newVariants = await this.ProductVariants.insertMany(variants)
+        return this.productModel.create({ variants: newVariants.map(v => v._id), ...product, images });
     }
 
     async update(id: string, params: UpdateProductDto) {

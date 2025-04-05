@@ -66,6 +66,10 @@ export class ProductsController {
                 path: file.path,
                 originalFilename: file.originalname, // Store the original filename
             }));
+
+            // const clientObject = JSON.parse(product.variants[]);
+
+            // console.log(product)
             const newProduct = await this.productsService.create(product);
 
             const productDir = `./uploads/products/${newProduct._id}`;
@@ -84,7 +88,7 @@ export class ProductsController {
 
             const primaryImage = imagePaths.find((img) => img.originalFilename === product.primaryImage)?.newPath || imagePaths[0].newPath;
 
-            console.log(imagePaths.map((pre) => pre.originalFilename))
+            // console.log(imagePaths.map((pre) => pre.originalFilename))
 
 
 
@@ -93,7 +97,7 @@ export class ProductsController {
         } catch (error) {
             throw new BadRequestException({
                 status: 500,
-                message: error,
+                message: error.message,
                 error: 'Bad Request',
             });
         }
