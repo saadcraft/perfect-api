@@ -32,8 +32,8 @@ export class Products extends Document {
   @Prop({ required: true })
   primaryImage: string;
 
-  @Prop({ type: Types.ObjectId, ref: "Variants" })
-  variants: Types.ObjectId;
+  @Prop({ type: [{ type: Types.ObjectId, ref: "Variants" }] })
+  variants: Types.ObjectId[];
 
   @Prop({ default: true })
   available: boolean;

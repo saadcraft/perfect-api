@@ -15,7 +15,7 @@ import { Variants, VariantsSchema } from 'src/schemas/variants.shema';
 @Module({
   imports: [MongooseModule.forFeature([
     { name: Products.name, schema: ProductSchema },
-    { name: Variants.name, schema: VariantsSchema, },
+    { name: Variants.name, schema: VariantsSchema },
   ]), UsersModule],
   controllers: [ProductsController],
   providers: [ProductsService]

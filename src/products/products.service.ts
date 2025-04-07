@@ -45,7 +45,7 @@ export class ProductsService {
     }
 
     async findOne(id: string): Promise<Products | null> {
-        return this.productModel.findById(id);
+        return this.productModel.findById(id).populate({ path: 'variants', model: 'Variants' });
     }
 
     async create({ variants, ...product }: CreateProductDto, images?: string[]) {
