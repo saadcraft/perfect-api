@@ -5,6 +5,7 @@ import {
     Delete,
     Get,
     HttpException,
+    NotFoundException,
     Param,
     Patch,
     Post,
@@ -110,14 +111,56 @@ export class ProductsController {
     @UseInterceptors(
         FileFieldsInterceptor([{ name: 'images', maxCount: 5 }], multerOptions),
     )
-    update(@Param('id') id: string, @Body(ValidationPipe)
+    async update(@Param('id') id: string, @Body(ValidationPipe)
     proUpdate: UpdateProductDto,
         @UploadedFiles() files?: { images?: Express.Multer.File[] }
     ) {
         // console.log(proUpdate)
         const isValid = mongoose.Types.ObjectId.isValid(id);
         if (!isValid) throw new HttpException('Invalid ID', 400);
-        return this.productsService.update(id, proUpdate)
+
+        const product = await this.productsService.findOne(id);
+        if (!product) throw new NotFoundException('Product not found');
+
+        let imagePaths = product.images || [];
+        let NewprimaryImage: string | null = null
+
+        if (files && files.images && files.images.length > 0) {
+            const productDir = `./uploads/products/${product._id}`;
+            fs.mkdirSync(productDir, { recursive: true });
+
+            const newImages = files.images.map((file) => {
+                const filename = path.basename(file.path);
+                const newPath = path.join(productDir, filename);
+                fs.renameSync(file.path, newPath);
+
+                return {
+                    newPath: `/uploads/products/${product._id}/${filename}`,
+                    originalFilename: file.originalname,
+                };
+            });
+            // Append new image paths
+            imagePaths = [...imagePaths, ...newImages.map((img) => img.newPath)];
+            NewprimaryImage = proUpdate.newPrimaryImage && newImages.find((img) => img.originalFilename === proUpdate.newPrimaryImage)?.newPath || null;
+        }
+        if (proUpdate.removeImage && Array.isArray(proUpdate.removeImage)) {
+            imagePaths = imagePaths.filter((img) => !proUpdate.removeImage?.includes(img))
+
+            for (const imgPath of proUpdate.removeImage) {
+                const localPath = path.join('.', imgPath); // Make sure the path is correct
+                if (fs.existsSync(localPath)) {
+                    fs.unlinkSync(localPath);
+                }
+            }
+        }
+        const primaryImage = proUpdate.oldPrimaryImage || NewprimaryImage || product.primaryImage;
+        const updatePayload = {
+            ...proUpdate,
+            images: imagePaths,
+            primaryImage,
+        };
+
+        return this.productsService.update(id, updatePayload)
     }
 
     @UseGuards(JwtAuthGuard, RolesGuard)
