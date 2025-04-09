@@ -3,6 +3,10 @@ import { ArrayMinSize, IsArray, IsEnum, IsNotEmpty, isNumber, IsNumber, IsOption
 import { AtLeastOneNotEmpty } from "src/config/at-least-one-not-empty.decorator";
 
 export class VariantsDto {
+
+    @IsOptional()
+    _id?: string;
+
     @IsString()
     @IsOptional()
     color: string;

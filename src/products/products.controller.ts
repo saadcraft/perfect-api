@@ -29,6 +29,7 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from 'src/config/multer.config';
 import * as fs from 'fs';
 import * as path from 'path';
+import { Variants } from 'src/schemas/variants.shema';
 
 @Controller('products')
 export class ProductsController {
@@ -122,6 +123,7 @@ export class ProductsController {
         const product = await this.productsService.findOne(id);
         if (!product) throw new NotFoundException('Product not found');
 
+        // let variantsIds = product.variants || [];
         let imagePaths = product.images || [];
         let NewprimaryImage: string | null = null
 
@@ -153,9 +155,20 @@ export class ProductsController {
                 }
             }
         }
-        const primaryImage = proUpdate.oldPrimaryImage || NewprimaryImage || product.primaryImage;
+        const primaryImage = proUpdate.oldPrimaryImage || NewprimaryImage || (imagePaths.includes(product.primaryImage) ? product.primaryImage : imagePaths[0]);
+
+        if (proUpdate.variants || proUpdate.removeVariant) {
+            await this.productsService.syncVariants(
+                id,
+                proUpdate.variants || [],
+                proUpdate.removeVariant || []
+            );
+        }
+        // Destructure to remove variants & removeVariant from proUpdate
+        const { variants, removeVariant, ...restUpdate } = proUpdate;
+
         const updatePayload = {
-            ...proUpdate,
+            ...restUpdate,
             images: imagePaths,
             primaryImage,
         };
