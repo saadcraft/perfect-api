@@ -47,7 +47,8 @@ export class UpdateProductDto {
     @IsArray()
     removeVariant?: string[];
 
-    @ValidateIf((obj) => obj.variants !== undefined && obj.variants !== null)
+    // @ValidateIf((obj) => obj.variants !== undefined && obj.variants !== null)
+    @IsOptional()
     @IsArray()
     @ArrayMinSize(1, { message: 'At least one variant is required' })
     @ValidateNested({ each: true })
