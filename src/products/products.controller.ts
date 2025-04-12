@@ -43,6 +43,8 @@ export class ProductsController {
 
     @Get(':id') // GET /products/:id
     findOne(@Param('id') id: string): Promise<Products | null> {
+        const isValid = mongoose.Types.ObjectId.isValid(id);
+        if (!isValid) throw new HttpException('Invalid ID', 400);
         return this.productsService.findOne(id)
     }
 

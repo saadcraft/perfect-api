@@ -37,6 +37,12 @@ export class Products extends Document {
 
   @Prop({ default: true })
   available: boolean;
+
+  @Prop({ required: false })
+  promotion: number
+
+  @Prop({ default: 0 })
+  rate: number;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Products);
