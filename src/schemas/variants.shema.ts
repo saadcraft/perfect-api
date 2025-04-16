@@ -1,19 +1,19 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { Document } from "mongoose";
+import { Document, Types } from "mongoose";
 
 
 
 @Schema()
 export class Variants extends Document {
 
-    @Prop({ required: false })
-    color: string;
+    @Prop({ required: true })
+    sku: string;
 
-    @Prop({ required: false })
-    resolution: string;
+    @Prop({ type: Types.ObjectId, ref: 'Product' })
+    product: Types.ObjectId;
 
-    @Prop({ required: false })
-    reference: string;
+    @Prop({ type: Map, of: String })
+    options: Map<string, string>;
 
     @Prop({ required: false })
     quntity: number;

@@ -5,6 +5,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { Products } from '../schemas/product.schema';
 import { Variants } from 'src/schemas/variants.shema';
+import { generateSkuFromOptions } from 'src/config/options';
 
 export type ProductRequest = {
     total: number;
@@ -49,8 +50,32 @@ export class ProductsService {
     }
 
     async create({ variants, ...product }: CreateProductDto, images?: string[]) {
-        const newVariants = await this.ProductVariants.insertMany(variants)
-        return this.productModel.create({ variants: newVariants.map(v => v._id), ...product, images });
+        // 1. Create the product first
+        const createdProduct = await this.productModel.create({
+            ...product,
+            images
+        });
+
+        const optionOrder = Object.keys(product.attributes);
+
+        // 2. Insert variants with the product ID included
+        const newVariants = await this.ProductVariants.insertMany(
+            variants.map(v => {
+                const options = v.options as unknown as Record<string, string>;
+                const sku = generateSkuFromOptions(options, optionOrder);
+                return {
+                    ...v,
+                    sku,
+                    product: createdProduct._id
+                }
+            })
+        );
+
+        // 3. Update the product with the variant IDs
+        createdProduct.variants = newVariants.map(v => v._id as mongoose.Types.ObjectId);
+        await createdProduct.save();
+
+        return createdProduct;
     }
 
     async update(id: string, params: UpdateProductDto) {

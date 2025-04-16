@@ -1,27 +1,34 @@
 import { Transform, Type } from "class-transformer";
-import { ArrayMinSize, IsArray, IsEnum, IsNotEmpty, isNumber, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator";
-import { AtLeastOneNotEmpty } from "src/config/at-least-one-not-empty.decorator";
+import { ArrayMinSize, IsArray, IsEnum, IsNotEmpty, IsNumber, IsObject, IsOptional, IsString, ValidateNested } from "class-validator";
+// import { AtLeastOneNotEmpty } from "src/config/at-least-one-not-empty.decorator";
 
 export class VariantsDto {
 
     @IsOptional()
     _id?: string;
 
-    @IsString()
     @IsOptional()
-    color: string;
+    sku?: string;
 
-    @IsString()
-    @IsOptional()
-    resolution: string;
+    // @IsString()
+    // @IsOptional()
+    // color: string;
 
-    @IsString()
-    @IsOptional()
-    reference: string;
+    // @IsString()
+    // @IsOptional()
+    // resolution: string;
 
-    // 👇 Validate that at least one of the fields is not empty
-    @AtLeastOneNotEmpty(['color', 'resolution', 'reference'])
-    dummy?: never; // Still needed, but more semantic
+    // @IsString()
+    // @IsOptional()
+    // reference: string;
+
+    // // 👇 Validate that at least one of the fields is not empty
+    // @AtLeastOneNotEmpty(['color', 'resolution', 'reference'])
+    // dummy?: never; // Still needed, but more semantic
+
+    @IsNotEmpty()
+    @IsObject()
+    options: Record<string, string[]>;
 
     @IsOptional()
     @Transform(({ value }) => Number(value))
@@ -59,6 +66,9 @@ export class CreateProductDto {
 
     @IsNotEmpty()
     primaryImage?: string; // Store primary image path
+
+    @IsObject()
+    attributes: Record<string, string[]>; // {"color": ["red", "blue"], "size": ["M", "L"]}
 
     @IsArray()
     @ArrayMinSize(1, { message: 'At least one variant is required' })

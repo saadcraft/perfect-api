@@ -26,6 +26,9 @@ export class Products extends Document {
   @Prop({ required: true })
   lowPrice: number;
 
+  @Prop({ type: Object })
+  attributes: Record<string, string[]>;
+
   @Prop({ type: [String], required: true }) // Array of image filenames
   images: string[];
 
@@ -39,7 +42,7 @@ export class Products extends Document {
   available: boolean;
 
   @Prop({ required: false })
-  promotion: number
+  promotion: number;
 
   @Prop({ default: 0 })
   rate: number;
