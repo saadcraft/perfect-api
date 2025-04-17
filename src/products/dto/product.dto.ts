@@ -10,18 +10,6 @@ export class VariantsDto {
     @IsOptional()
     sku?: string;
 
-    // @IsString()
-    // @IsOptional()
-    // color: string;
-
-    // @IsString()
-    // @IsOptional()
-    // resolution: string;
-
-    // @IsString()
-    // @IsOptional()
-    // reference: string;
-
     // // 👇 Validate that at least one of the fields is not empty
     // @AtLeastOneNotEmpty(['color', 'resolution', 'reference'])
     // dummy?: never; // Still needed, but more semantic
@@ -56,9 +44,9 @@ export class CreateProductDto {
     })
     category: string;
 
+    @Transform(({ value }) => Number(value))
     @IsNumber()
-    @IsOptional()
-    lowPrice?: number;
+    lowPrice: number;
 
     @IsArray()
     @IsOptional() // Images may be optional initially before upload
@@ -70,6 +58,7 @@ export class CreateProductDto {
     @IsObject()
     attributes: Record<string, string[]>; // {"color": ["red", "blue"], "size": ["M", "L"]}
 
+    @IsOptional()
     @IsArray()
     @ArrayMinSize(1, { message: 'At least one variant is required' })
     @ValidateNested({ each: true })

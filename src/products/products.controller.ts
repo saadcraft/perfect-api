@@ -29,7 +29,6 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from 'src/config/multer.config';
 import * as fs from 'fs';
 import * as path from 'path';
-import { Variants } from 'src/schemas/variants.shema';
 
 @Controller('products')
 export class ProductsController {
@@ -71,12 +70,7 @@ export class ProductsController {
                 originalFilename: file.originalname, // Store the original filename
             }));
 
-            const lowest = product.variants.reduce((min, item) => item.price < min.price ? item : min);
-
-            // const clientObject = JSON.parse(product.variants[]);
-
-            // console.log(product)
-            const newProduct = await this.productsService.create({ ...product, lowPrice: lowest.price });
+            const newProduct = await this.productsService.create(product);
 
             const productDir = `./uploads/products/${newProduct._id}`;
             fs.mkdirSync(productDir, { recursive: true });
@@ -93,8 +87,6 @@ export class ProductsController {
             });
 
             const primaryImage = imagePaths.find((img) => img.originalFilename === product.primaryImage)?.newPath || imagePaths[0].newPath;
-
-            // console.log(imagePaths.map((pre) => pre.originalFilename))
 
 
             await this.productsService.update(newProduct.id, { images: imagePaths.map((img) => img.newPath), primaryImage });
