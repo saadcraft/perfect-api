@@ -10,16 +10,15 @@ import {
     Patch,
     Post,
     Query,
-    Req,
     UploadedFiles,
     UseGuards,
     UseInterceptors,
     ValidationPipe
 } from '@nestjs/common';
 import { ProductsService, ProductRequest } from "./products.service"
-import { CreateProductDto } from "./dto/product.dto"
+import { CreateProductDto, VariantsDto } from "./dto/product.dto"
 import { Products } from '../schemas/product.schema';
-import { UpdateProductDto } from './dto/update.dto';
+import { UpdateProductDto, VariantUpdateDto } from './dto/update.dto';
 import mongoose from 'mongoose';
 import { JwtAuthGuard } from '../users/jwt/jwt-auth.guard';
 import { Roles } from 'src/users/auth/auth.decorator';
@@ -29,6 +28,7 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from 'src/config/multer.config';
 import * as fs from 'fs';
 import * as path from 'path';
+import { Variants } from 'src/schemas/variants.shema';
 
 @Controller('products')
 export class ProductsController {
@@ -45,6 +45,13 @@ export class ProductsController {
         const isValid = mongoose.Types.ObjectId.isValid(id);
         if (!isValid) throw new HttpException('Invalid ID', 400);
         return this.productsService.findOne(id)
+    }
+
+    @Get('variants/:id')
+    findVariants(@Param("id") id: string): Promise<Variants[] | null> {
+        const isValid = mongoose.Types.ObjectId.isValid(id);
+        if (!isValid) throw new HttpException('Invalid ID', 400);
+        return this.productsService.findVariants(id)
     }
 
     @UseGuards(JwtAuthGuard, RolesGuard)
@@ -151,23 +158,29 @@ export class ProductsController {
         }
         const primaryImage = proUpdate.oldPrimaryImage || NewprimaryImage || (imagePaths.includes(product.primaryImage) ? product.primaryImage : imagePaths[0]);
 
-        if (proUpdate.variants || proUpdate.removeVariant) {
-            await this.productsService.syncVariants(
-                id,
-                proUpdate.variants || [],
-                proUpdate.removeVariant || []
-            );
-        }
+        // if (proUpdate.variants || proUpdate.removeVariant) {
+        //     await this.productsService.syncVariants(
+        //         id,
+        //         proUpdate.variants || [],
+        //         proUpdate.removeVariant || []
+        //     );
+        // }
         // Destructure to remove variants & removeVariant from proUpdate
-        const { variants, removeVariant, ...restUpdate } = proUpdate;
 
         const updatePayload = {
-            ...restUpdate,
+            ...proUpdate,
             images: imagePaths,
             primaryImage,
         };
 
         return this.productsService.update(id, updatePayload)
+    }
+
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    @Patch('variants/update')
+    updateVariants(@Body(ValidationPipe) body: VariantUpdateDto) {
+        return this.productsService.updateVariants(body.updates);
     }
 
     @UseGuards(JwtAuthGuard, RolesGuard)

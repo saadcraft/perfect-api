@@ -1,11 +1,11 @@
 import { Transform, Type } from "class-transformer";
-import { ArrayMinSize, IsArray, IsEnum, IsNotEmpty, IsNumber, IsObject, IsOptional, IsString, ValidateNested } from "class-validator";
+import { ArrayMinSize, IsArray, IsEnum, IsMongoId, IsNotEmpty, IsNumber, IsObject, IsOptional, IsString, ValidateNested } from "class-validator";
 // import { AtLeastOneNotEmpty } from "src/config/at-least-one-not-empty.decorator";
 
 export class VariantsDto {
 
-    @IsOptional()
-    _id?: string;
+    @IsMongoId()
+    id: string;
 
     @IsOptional()
     sku?: string;
@@ -14,7 +14,7 @@ export class VariantsDto {
     // @AtLeastOneNotEmpty(['color', 'resolution', 'reference'])
     // dummy?: never; // Still needed, but more semantic
 
-    @IsNotEmpty()
+    @IsOptional()
     @IsObject()
     options: Record<string, string[]>;
 

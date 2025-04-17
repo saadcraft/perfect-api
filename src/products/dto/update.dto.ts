@@ -1,6 +1,7 @@
 import { Transform, Type } from "class-transformer";
 import { ArrayMinSize, IsArray, IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateIf, ValidateNested } from "class-validator";
 import { VariantsDto } from "./product.dto";
+// import { VariantsDto } from "./product.dto";
 // import { AtLeastOneNotEmpty } from "src/config/at-least-one-not-empty.decorator";
 
 export class UpdateProductDto {
@@ -43,16 +44,24 @@ export class UpdateProductDto {
     @IsArray()
     removeImage?: string[];
 
-    @IsOptional()
-    @IsArray()
-    removeVariant?: string[];
+    // @IsOptional()
+    // @IsArray()
+    // removeVariant?: string[];
 
     // @ValidateIf((obj) => obj.variants !== undefined && obj.variants !== null)
-    @IsOptional()
+    // @IsOptional()
+    // @IsArray()
+    // @ArrayMinSize(1, { message: 'At least one variant is required' })
+    // @ValidateNested({ each: true })
+    // // @Transform(({ value }) => Array(value))
+    // @Type(() => VariantsDto)
+    // variants?: VariantsDto[];
+}
+
+
+export class VariantUpdateDto {
     @IsArray()
-    @ArrayMinSize(1, { message: 'At least one variant is required' })
     @ValidateNested({ each: true })
-    // @Transform(({ value }) => Array(value))
     @Type(() => VariantsDto)
-    variants?: VariantsDto[];
+    updates: VariantsDto[];
 }
