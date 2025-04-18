@@ -178,9 +178,12 @@ export class ProductsController {
 
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.ADMIN)
-    @Patch('variants/update')
-    updateVariants(@Body(ValidationPipe) body: VariantUpdateDto) {
-        return this.productsService.updateVariants(body.updates);
+    @Patch('variants/:id')
+    updateVariants(@Param('id') id: string, @Body(ValidationPipe) body: VariantUpdateDto) {
+        const isValid = mongoose.Types.ObjectId.isValid(id);
+        if (!isValid) throw new HttpException('Invalid ID', 400);
+        return this.productsService.updateVariants(id, body.updates);
+
     }
 
     @UseGuards(JwtAuthGuard, RolesGuard)

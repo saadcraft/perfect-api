@@ -67,7 +67,8 @@ export class ProductsService {
             CombinatVariants.map(v => {
                 return {
                     ...v,
-                    product: createdProduct._id
+                    product: createdProduct._id,
+                    price: product.lowPrice
                 }
             })
         );
@@ -83,12 +84,19 @@ export class ProductsService {
         return this.productModel.findByIdAndUpdate(id, params, { new: true });
     }
 
-    async updateVariants(variants: VariantsDto[]) {
+    async updateVariants(id: string, variants: VariantsDto[]) {
+        const price: number[] = [];
         const updatedVariants = await Promise.all(
-            variants.map(variant =>
-                this.ProductVariants.findByIdAndUpdate(variant.id, variant, { new: true })
+            variants.map(async variant => {
+                const updated = await this.ProductVariants.findByIdAndUpdate(variant.id, variant, { new: true })
+                price.push(variant.price)
+                return updated;
+            }
             )
         );
+        const lowestPrice = Math.min(...price);
+
+        this.update(id, { lowPrice: lowestPrice })
 
         return updatedVariants;
     }
