@@ -64,4 +64,7 @@ export class VariantUpdateDto {
     @ValidateNested({ each: true })
     @Type(() => VariantsDto)
     updates: VariantsDto[];
+
+    @IsOptional()
+    removeAttribut?: boolean;
 }

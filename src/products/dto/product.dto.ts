@@ -1,5 +1,5 @@
 import { Transform, Type } from "class-transformer";
-import { ArrayMinSize, IsArray, IsEnum, IsMongoId, IsNotEmpty, IsNumber, IsObject, IsOptional, IsString, ValidateNested } from "class-validator";
+import { ArrayMinSize, IsArray, IsEnum, IsMongoId, isNotEmpty, IsNotEmpty, IsNumber, IsObject, IsOptional, IsString, ValidateNested } from "class-validator";
 // import { AtLeastOneNotEmpty } from "src/config/at-least-one-not-empty.decorator";
 
 export class VariantsDto {
@@ -21,13 +21,12 @@ export class VariantsDto {
     @IsOptional()
     @Transform(({ value }) => Number(value))
     @IsNumber()
-    quntity: number;
+    quntity?: number;
 
     @Transform(({ value }) => Number(value))
     @IsNumber()
     @IsNotEmpty()
     price: number;
-
 }
 
 export class CreateProductDto {

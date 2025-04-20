@@ -84,11 +84,17 @@ export class ProductsService {
         return this.productModel.findByIdAndUpdate(id, params, { new: true });
     }
 
-    async updateVariants(id: string, variants: VariantsDto[]) {
+    async updateVariants(id: string, variants: VariantUpdateDto) {
         const price: number[] = [];
         const updatedVariants = await Promise.all(
-            variants.map(async variant => {
-                const updated = await this.ProductVariants.findByIdAndUpdate(variant.id, variant, { new: true })
+            variants.updates.map(async variant => {
+                const updateQuery = variants.removeAttribut ? {
+                    $unset: { quntity: "" },
+                    $set: { ...variant, quntity: undefined }, // Avoid sending `quantity` with undefined
+                } : {
+                    $set: variant,
+                };
+                const updated = await this.ProductVariants.findByIdAndUpdate(variant.id, updateQuery, { new: true })
                 price.push(variant.price)
                 return updated;
             }

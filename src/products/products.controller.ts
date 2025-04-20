@@ -182,7 +182,7 @@ export class ProductsController {
     updateVariants(@Param('id') id: string, @Body(ValidationPipe) body: VariantUpdateDto) {
         const isValid = mongoose.Types.ObjectId.isValid(id);
         if (!isValid) throw new HttpException('Invalid ID', 400);
-        return this.productsService.updateVariants(id, body.updates);
+        return this.productsService.updateVariants(id, body);
 
     }
 
