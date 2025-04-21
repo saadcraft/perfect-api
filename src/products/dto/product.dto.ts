@@ -51,7 +51,7 @@ export class CreateProductDto {
     @IsOptional() // Images may be optional initially before upload
     images?: string[];
 
-    @IsNotEmpty()
+    @IsNotEmpty({ message: "select primary image" })
     primaryImage?: string; // Store primary image path
 
     @IsObject()
