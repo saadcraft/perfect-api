@@ -1,11 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { UpdateProductDto, VariantUpdateDto } from './dto/update.dto'
-import { CreateProductDto, VariantsDto } from './dto/product.dto'
+import { CreateProductDto } from './dto/product.dto'
 import { InjectModel } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { Products } from '../schemas/product.schema';
 import { Variants } from 'src/schemas/variants.shema';
-import { generateCombinationsFromOptions, generateSkuFromOptions } from 'src/config/options';
+import { generateCombinationsFromOptions } from 'src/config/options';
 
 export type ProductRequest = {
     total: number;
