@@ -17,6 +17,15 @@ export class OrderInformation extends Document {
     @Prop({ required: true })
     adresse: string;
 
+    @Prop({ required: false })
+    email: string;
+
+    @Prop({ default: "En attente" })
+    status: string;
+
+    @Prop({ required: false })
+    tracking: string;
+
     @Prop({ type: [{ type: Types.ObjectId, ref: "Orders" }] })
     orders: Types.ObjectId[];
 

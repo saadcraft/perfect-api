@@ -1,11 +1,11 @@
 import { Transform, Type } from "class-transformer";
-import { ArrayMinSize, IsArray, IsMongoId, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator";
+import { ArrayMinSize, IsArray, IsEmail, IsMongoId, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator";
 
 
 export class OrderDto {
 
     @IsMongoId()
-    variantId: string;
+    variant: string;
 
     @IsOptional()
     @Transform(({ value }) => Number(value))
@@ -34,6 +34,10 @@ export class orderInfoDto {
     @IsString()
     @IsNotEmpty({ message: "l'adresse ne doit pas être vide" })
     adresse: string;
+
+    @IsOptional()
+    @IsEmail()
+    email: string;
 
     @IsOptional()
     @IsMongoId()

@@ -5,6 +5,15 @@ import { OrderInformation } from 'src/schemas/orderInfo.shema';
 import { Orders } from 'src/schemas/orders.shema';
 import { orderInfoDto } from './dto/creatOrderDto';
 
+export type ProductRequest = {
+    total: number;
+    page: number;
+    totalPages: number;
+    result: OrderInformation[];
+}
+
+const limit = 10;
+
 @Injectable()
 export class OrdersService {
 
@@ -13,8 +22,25 @@ export class OrdersService {
         @InjectModel(Orders.name) private readonly OrdersModel: mongoose.Model<Orders>,
     ) { }
 
+    async findByClient(phoneNumber: string, page?: number): Promise<ProductRequest | null> {
+        const skip = (page ? page - 1 : 0) * limit;
+
+        const data = await this.OrderInfoModel.find({ phoneNumber }).sort({ createdAt: -1 }).skip(skip).limit(limit).populate({ path: 'orders', model: 'Orders' });
+        const total = await this.OrderInfoModel.countDocuments({ phoneNumber });
+
+        return {
+            total,
+            page: Number(page) || 1,
+            totalPages: Math.ceil(total / limit),
+            result: data,
+        }
+
+    }
+
     async create({ orders, ...orderinfo }: orderInfoDto) {
         const createdOrderInfo = await this.OrderInfoModel.create(orderinfo);
+
+
 
         const createOrders = await this.OrdersModel.insertMany(orders.map(order => ({
             ...order,
