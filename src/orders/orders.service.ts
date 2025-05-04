@@ -37,6 +37,23 @@ export class OrdersService {
 
     }
 
+    async findByOrder(id: string): Promise<OrderInformation | null> {
+        return this.OrderInfoModel.findById(id).populate([
+            {
+                path: 'orders',
+                model: 'Orders',
+                populate: {
+                    path: 'variant',
+                    model: 'Variants',
+                    populate: {
+                        path: 'product',
+                        model: 'Products',
+                    },
+                },
+            },
+        ]);
+    }
+
     async create({ orders, ...orderinfo }: orderInfoDto) {
         const createdOrderInfo = await this.OrderInfoModel.create(orderinfo);
 
