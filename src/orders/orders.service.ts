@@ -5,7 +5,7 @@ import { OrderInformation } from 'src/schemas/orderInfo.shema';
 import { Orders } from 'src/schemas/orders.shema';
 import { orderInfoDto } from './dto/creatOrderDto';
 
-export type ProductRequest = {
+export type OrderRequest = {
     total: number;
     page: number;
     totalPages: number;
@@ -22,7 +22,7 @@ export class OrdersService {
         @InjectModel(Orders.name) private readonly OrdersModel: mongoose.Model<Orders>,
     ) { }
 
-    async findByClient(phoneNumber: string, page?: number): Promise<ProductRequest | null> {
+    async findByClient(phoneNumber: string, page?: number): Promise<OrderRequest | null> {
         const skip = (page ? page - 1 : 0) * limit;
 
         const data = await this.OrderInfoModel.find({ phoneNumber }).sort({ createdAt: -1 }).skip(skip).limit(limit).populate({ path: 'orders', model: 'Orders' });
@@ -52,6 +52,34 @@ export class OrdersService {
                 },
             },
         ]);
+    }
+
+    async findAll(filters: { number?: string; user?: string }, page?: number): Promise<OrderRequest | null> {
+        const skip = (page ? page - 1 : 0) * limit; // Calculate the offset
+        const query: { [key: string]: any } = {};
+        if (filters.user?.trim()) {
+            query.user = filters.user.trim();
+        }
+
+        if (filters.number?.trim()) {
+            const searchTerm = filters.number.trim();
+            const regexPattern = searchTerm.split('').join('.*');
+            query.phoneNumber = { $regex: regexPattern, $options: 'i' };
+        }
+        const [data, total] = await Promise.all([
+            this.OrderInfoModel.find(query)
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit)
+                .populate({ path: 'orders', model: 'Orders' }),
+            this.OrderInfoModel.countDocuments(query)
+        ]);
+        return {
+            total,
+            page: Number(page) || 1,
+            totalPages: Math.ceil(total / limit),
+            result: data,
+        }
     }
 
     async create({ orders, ...orderinfo }: orderInfoDto) {
