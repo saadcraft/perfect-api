@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './global.exception.filter';
 import { LoggingInterceptor } from './logging.interceptor';
 import { ValidationPipe } from '@nestjs/common';
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -14,6 +15,14 @@ async function bootstrap() {
     transform: true,
     whitelist: true,
   }));
+  app.use(cookieParser());
+
+  app.enableCors({
+    origin: (origin, callback) => {
+      callback(null, origin); // reflect the request origin
+    },
+    credentials: true,
+  });
 
   await app.listen(process.env.PORT ?? 8000);
 }

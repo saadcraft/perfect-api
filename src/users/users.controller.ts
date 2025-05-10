@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Param, Post, UseGuards, ValidationPipe, Request } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards, ValidationPipe, Req, Res } from '@nestjs/common';
+import { Response, Request } from 'express';
 import { UsersService } from './users.service';
 import { CreatUserDto } from './dto/creatUser.dto';
 import { LocalAuthGuard } from './jwt/local-auth.guard';
@@ -15,8 +16,29 @@ export class UsersController {
 
     @Post('login')
     @UseGuards(LocalAuthGuard)
-    async login(@Request() req) {
+    async login(@Req() req, @Res({ passthrough: true }) res: Response) {
+
+        res.cookie('access_token', req.user.access_token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 15 * 60 * 1000, // 15 minutes
+        });
+
+        res.cookie('refresh_token', req.user.refresh_token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        });
         return req.user;
+    }
+
+    @Post('logout')
+    logout(@Res({ passthrough: true }) res: Response) {
+        res.clearCookie('access_token');
+        res.clearCookie('refresh_token');
+        return { message: 'Logged out' };
     }
 
     @Get(':id')
@@ -26,8 +48,25 @@ export class UsersController {
     }
 
     @Post('refresh')
-    refreshUser(@Body() body: { refresh_token: string }) {
-        return this.usersService.refreshUser(body.refresh_token)
+    async refreshUser(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+        const refreshToken = req.cookies['refresh_token'];
+        console.log(refreshToken)
+        const refresh = await this.usersService.refreshUser(refreshToken)
+        res.cookie('access_token', refresh.access_token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 15 * 60 * 1000, // 15 minutes
+        });
+
+        res.cookie('refresh_token', refresh.refresh_token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        });
+
+        return refresh;
     }
 
 }
