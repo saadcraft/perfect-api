@@ -21,14 +21,14 @@ export class UsersController {
         res.cookie('access_token', req.user.access_token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
+            sameSite: 'strict',
             maxAge: 15 * 60 * 1000, // 15 minutes
         });
 
         res.cookie('refresh_token', req.user.refresh_token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
+            sameSite: 'strict',
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         });
         return req.user;
@@ -50,19 +50,19 @@ export class UsersController {
     @Post('refresh')
     async refreshUser(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
         const refreshToken = req.cookies['refresh_token'];
-        console.log(refreshToken)
+        // console.log(refreshToken)
         const refresh = await this.usersService.refreshUser(refreshToken)
         res.cookie('access_token', refresh.access_token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 15 * 60 * 1000, // 15 minutes
+            sameSite: 'strict',
+            maxAge: 60 * 60 * 1000, // 60 minutes
         });
 
         res.cookie('refresh_token', refresh.refresh_token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
+            sameSite: 'strict',
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         });
 
