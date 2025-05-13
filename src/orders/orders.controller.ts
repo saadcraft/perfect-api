@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query, UseGuards, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Put, Query, UseGuards, ValidationPipe } from '@nestjs/common';
 import { OrderRequest, OrdersService } from './orders.service';
 import { orderInfoDto } from './dto/creatOrderDto';
 import { OrderInformation } from 'src/schemas/orderInfo.shema';
@@ -6,6 +6,7 @@ import { JwtAuthGuard } from '../users/jwt/jwt-auth.guard';
 import { Roles } from 'src/users/auth/auth.decorator';
 import { Role } from 'src/schemas/user.schema';
 import { RolesGuard } from 'src/users/auth/role.guard';
+import { updateOrderDto } from './dto/updateOrderDto';
 
 @Controller('orders')
 export class OrdersController {
@@ -28,10 +29,15 @@ export class OrdersController {
         return this.ordersService.findByOrder(id);
     }
 
-
-
     @Post() //POST /orders
     async create(@Body(ValidationPipe) order: orderInfoDto) {
         return this.ordersService.create(order)
+    }
+
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    @Patch(':id')
+    async update(@Param("id") id: string, @Body() order: updateOrderDto) {
+        return this.ordersService.update(id, order);
     }
 }

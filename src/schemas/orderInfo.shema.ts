@@ -1,6 +1,15 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 
+export enum Statue {
+    PANDING = 'En attente',
+    ACCEPTED = 'Accepté',
+    CANCELED = 'Annulé',
+    INWAY = 'En route',
+    DELIVRED = 'Livré',
+    RETURNED = 'Retour'
+}
+
 @Schema({
     timestamps: true,
 })
@@ -21,7 +30,7 @@ export class OrderInformation extends Document {
     email: string;
 
     @Prop({ default: "En attente" })
-    status: string;
+    status: Statue;
 
     @Prop({ required: false })
     tracking: string;

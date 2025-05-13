@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import { OrderInformation } from 'src/schemas/orderInfo.shema';
 import { Orders } from 'src/schemas/orders.shema';
 import { orderInfoDto } from './dto/creatOrderDto';
+import { updateOrderDto } from './dto/updateOrderDto';
 
 export type OrderRequest = {
     total: number;
@@ -97,6 +98,10 @@ export class OrdersService {
 
         return createdOrderInfo;
 
+    }
+
+    async update(id: string, order: updateOrderDto) {
+        return this.OrderInfoModel.findByIdAndUpdate(id, order, { new: true });
     }
 
 }
