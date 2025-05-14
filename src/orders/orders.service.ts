@@ -55,11 +55,14 @@ export class OrdersService {
         ]);
     }
 
-    async findAll(filters: { number?: string; user?: string }, page?: number): Promise<OrderRequest | null> {
+    async findAll(filters: { number?: string; user?: string; status?: string }, page?: number): Promise<OrderRequest | null> {
         const skip = (page ? page - 1 : 0) * limit; // Calculate the offset
         const query: { [key: string]: any } = {};
         if (filters.user?.trim()) {
             query.user = filters.user.trim();
+        }
+        if (filters.status?.trim()) {
+            query.status = filters.status.trim();
         }
 
         if (filters.number?.trim()) {

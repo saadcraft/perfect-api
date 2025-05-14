@@ -15,8 +15,8 @@ export class OrdersController {
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.ADMIN)
     @Get("all") //Get get all orders for ADMIN
-    findAll(@Query('user') user: string, @Query('phoneNumber') number: string, @Query('page') page: number): Promise<OrderRequest | null> {
-        return this.ordersService.findAll({ number, user }, page);
+    findAll(@Query('user') user: string, @Query('phoneNumber') number: string, @Query('status') status: string, @Query('page') page: number): Promise<OrderRequest | null> {
+        return this.ordersService.findAll({ number, user, status }, page);
     }
 
     @Get(":num")
