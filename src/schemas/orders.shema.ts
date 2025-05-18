@@ -4,7 +4,10 @@ import { Document, Types } from 'mongoose';
 @Schema()
 export class Orders extends Document {
     @Prop({ type: Types.ObjectId, ref: "Variants" })
-    variant: Types.ObjectId;
+    variant?: Types.ObjectId;
+
+    @Prop({ type: Types.ObjectId, ref: "Parsonalizer" })
+    parsonalizer?: Types.ObjectId;
 
     @Prop({ type: Types.ObjectId, ref: "OrderInformation" })
     orderInfo: Types.ObjectId;

@@ -5,6 +5,7 @@ import { OrderInformation } from 'src/schemas/orderInfo.shema';
 import { Orders } from 'src/schemas/orders.shema';
 import { orderInfoDto } from './dto/creatOrderDto';
 import { updateOrderDto } from './dto/updateOrderDto';
+import { Parsonalizer } from 'src/schemas/personalizer';
 
 export type OrderRequest = {
     total: number;
@@ -21,6 +22,7 @@ export class OrdersService {
     constructor(
         @InjectModel(OrderInformation.name) private readonly OrderInfoModel: mongoose.Model<OrderInformation>,
         @InjectModel(Orders.name) private readonly OrdersModel: mongoose.Model<Orders>,
+        @InjectModel(Parsonalizer.name) private readonly PersonalizerModel: mongoose.Model<Parsonalizer>,
     ) { }
 
     async findByClient(phoneNumber: string, page?: number): Promise<OrderRequest | null> {
@@ -43,14 +45,21 @@ export class OrdersService {
             {
                 path: 'orders',
                 model: 'Orders',
-                populate: {
-                    path: 'variant',
-                    model: 'Variants',
-                    populate: {
-                        path: 'product',
-                        model: 'Products',
+                populate: [
+                    {
+                        path: 'variant',
+                        model: 'Variants',
+                        populate: {
+                            path: 'product',
+                            model: 'Products',
+                        },
+
                     },
-                },
+                    {
+                        path: 'parsonalizer',
+                        model: 'Parsonalizer',
+                    },
+                ]
             },
         ]);
     }
@@ -89,11 +98,19 @@ export class OrdersService {
     async create({ orders, ...orderinfo }: orderInfoDto) {
         const createdOrderInfo = await this.OrderInfoModel.create(orderinfo);
 
+        let personalizerId: mongoose.Types.ObjectId | null = null;
 
+        for (const order of orders) {
+            if (order.parsonalizer) {
+                const createdPersonalizer = await this.PersonalizerModel.create(order.parsonalizer);
+                personalizerId = createdPersonalizer._id as mongoose.Types.ObjectId;
+            }
+        }
 
         const createOrders = await this.OrdersModel.insertMany(orders.map(order => ({
             ...order,
-            orderInfo: createdOrderInfo.id
+            orderInfo: createdOrderInfo.id,
+            parsonalizer: personalizerId
         })));
 
         createdOrderInfo.orders = createOrders.map(o => o._id as mongoose.Types.ObjectId);
