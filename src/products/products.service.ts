@@ -14,7 +14,7 @@ export type ProductRequest = {
     result: Products[];
 }
 
-const limit = 10;
+const limit = 20;
 
 @Injectable()
 export class ProductsService {
