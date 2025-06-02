@@ -26,8 +26,8 @@ export class WilayaService {
                 { code_recieve: filters.wilaya }
             ];
         }
-        const data = await this.wilayaModule.find({ ...query }).sort({ createdAt: -1 }).skip(skip).limit(limit);
-        const total = await this.wilayaModule.countDocuments({ ...query });
+        const data = await this.wilayaModule.find({ ...query, available: true }).sort({ createdAt: -1 }).skip(skip).limit(limit);
+        const total = await this.wilayaModule.countDocuments({ ...query, available: true });
         return {
             total,
             page: Number(page) || 1,

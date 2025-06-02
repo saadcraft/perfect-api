@@ -21,6 +21,9 @@ export class Wilayas extends Document {
 
     @Prop({ required: true })
     prix_domicile: number;
+
+    @Prop({ default: true })
+    available: boolean;
 }
 
 export const WilayaShema = SchemaFactory.createForClass(Wilayas);
