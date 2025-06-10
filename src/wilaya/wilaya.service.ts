@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
 import { Wilayas } from 'src/schemas/wilayas.shema';
 import { WilayaDto } from './dto/creatWilayaDto';
+import { CreatWilayaDto } from './dto/updateWilayaDto';
 
 export type WilayaRequest = {
     total: number;
@@ -47,5 +48,13 @@ export class WilayaService {
         })));
 
         return createWilaya;
+    }
+
+    async update(id: string, body: CreatWilayaDto): Promise<Wilayas | null> {
+        return this.wilayaModule.findByIdAndUpdate(id, body, { new: true })
+    }
+
+    async delete(id: string) {
+        return this.wilayaModule.findByIdAndDelete(id)
     }
 }
