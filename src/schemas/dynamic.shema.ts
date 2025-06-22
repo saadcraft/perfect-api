@@ -15,8 +15,8 @@ export class Dynamic extends Document {
     @Prop({ type: [{ type: Types.ObjectId, ref: "Fqa" }] })
     fqa: Types.ObjectId[];
 
-    @Prop({ type: [{ type: Types.ObjectId, ref: "HeroPictures" }] })
-    heroPictures: Types.ObjectId[];
+    @Prop({ type: Types.ObjectId, ref: "HeroPictures" })
+    heroPictures: Types.ObjectId;
 }
 
 export const DynamicSchema = SchemaFactory.createForClass(Dynamic);

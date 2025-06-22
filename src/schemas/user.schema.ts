@@ -35,6 +35,9 @@ export class Users extends Document {
 
     @Prop({ type: Types.ObjectId, ref: "Profile" })
     profile: Types.ObjectId;
+
+    @Prop({ type: Types.ObjectId, ref: "Dynamic" })
+    dynamics: Types.ObjectId
 }
 
 export const UserSchema = SchemaFactory.createForClass(Users);

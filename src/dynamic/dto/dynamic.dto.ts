@@ -12,6 +12,11 @@ export class FqaDto {
     description: string;
 }
 
+export class ImagesDto {
+    @IsArray()
+    image: string[];
+}
+
 
 export class DynamicDto {
     @IsNotEmpty()
@@ -30,5 +35,9 @@ export class DynamicDto {
     @ValidateNested({ each: true })
     @Type(() => FqaDto)
     fqa: FqaDto[];
+
+    @ValidateNested({ each: true })
+    @Type(() => ImagesDto)
+    heroPictures: ImagesDto;
 
 }

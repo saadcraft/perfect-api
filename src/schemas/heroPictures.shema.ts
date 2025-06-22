@@ -3,11 +3,11 @@ import { Document } from 'mongoose';
 
 @Schema()
 export class HeroPictures extends Document {
-    @Prop({ required: true })
+    @Prop({ required: false })
     title: string;
 
     @Prop({ required: true })
-    image: string;
+    image: string[];
 }
 
 export const HeroPicturesSchema = SchemaFactory.createForClass(HeroPictures);
