@@ -4,8 +4,10 @@ import mongoose from 'mongoose';
 import { Dynamic } from 'src/schemas/dynamic.shema';
 import { Fqa } from 'src/schemas/fqa.shema';
 import { HeroPictures } from 'src/schemas/heroPictures.shema';
-import { DynamicDto } from './dto/dynamic.dto';
+import { DynamicDto, ImagesDto } from './dto/dynamic.dto';
 import { Users } from 'src/schemas/user.schema';
+import path from 'path';
+import { UpdateImagesDto } from './dto/updateDynamic.dto';
 
 type ImagesType = {
     path: string;
@@ -24,7 +26,14 @@ export class DynamicService {
     ) { }
 
     async findAll() {
-        return this.DynamicModel.find().populate({ path: 'fqa', model: 'Fqa' });
+        return this.DynamicModel.find().populate([
+            { path: 'fqa', model: 'Fqa' },
+            { path: 'heroPictures', model: 'heroPictures' }
+        ]);
+    }
+
+    async findImages(id: string) {
+        return this.HeroPicturesModel.findById({ _id: id }).populate({ path: 'dynamic', model: 'Dynamic' });
     }
 
     async create(images: ImagesType[], { fqa, ...dynamikDto }: DynamicDto, req: any) {
@@ -36,7 +45,8 @@ export class DynamicService {
         const addFqa = await this.FaqModel.insertMany(fqa.map(pre => ({ ...pre })));
 
         const addImage = await this.HeroPicturesModel.create({
-            image: images.map(pre => `uploads/magasin/${addDynamo.id}/${pre.fileName}`)
+            image: images.map(pre => `uploads/magasin/${addDynamo.id}/${pre.fileName}`),
+            dynamic: addDynamo.id
         });
 
         addDynamo.fqa = addFqa.map(v => v._id as mongoose.Types.ObjectId);
@@ -50,6 +60,10 @@ export class DynamicService {
         // Optionally update user document if needed
 
         return addDynamo;
+    }
+
+    async updateImage(id: string, images: UpdateImagesDto) {
+        return await this.HeroPicturesModel.findByIdAndUpdate({ _id: id }, images, { new: true });
     }
 
 }

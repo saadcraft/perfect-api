@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Post, Req, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, HttpException, NotFoundException, Param, Patch, Post, Req, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { DynamicService } from './dynamic.service';
 import { DynamicDto } from './dto/dynamic.dto';
 import { JwtAuthGuard } from 'src/users/jwt/jwt-auth.guard';
@@ -10,6 +10,8 @@ import { multerOptions } from 'src/config/multer.config';
 import * as fs from 'fs';
 import * as path from 'path';
 import { Request } from '@nestjs/common';
+import { UpdateImagesDto } from './dto/updateDynamic.dto';
+import mongoose from 'mongoose';
 
 @Controller('dynamic')
 export class DynamicController {
@@ -50,7 +52,7 @@ export class DynamicController {
 
             const newDynamic = await this.dynamicService.create(images, dynamikDto, req);
 
-            const productDir = `./uploads/magasin/`;
+            const productDir = `./uploads/magasin/${newDynamic.id}/`;
             fs.mkdirSync(productDir, { recursive: true });
 
             images.map(({ path: oldPath }) => {
@@ -73,4 +75,62 @@ export class DynamicController {
         }
     }
 
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    @Patch('Image/:id')
+    @UseInterceptors(
+        FileFieldsInterceptor([{ name: 'image', maxCount: 6 }], multerOptions),
+    )
+    async updateImage(
+        @Param('id') id: string,
+        @Body() imageDto: UpdateImagesDto,
+        @UploadedFiles() files?: { image?: Express.Multer.File[] }
+    ) {
+        const isValid = mongoose.Types.ObjectId.isValid(id);
+        if (!isValid) throw new HttpException('Invalid ID', 400);
+
+        const images = await this.dynamicService.findImages(id);
+        if (!images) throw new NotFoundException('image not found');
+
+        let imagePaths = images.image || [];
+
+        if (files && files.image && files.image.length > 0) {
+            const productDir = `./uploads/magasin/${images.dynamic._id}`;
+            fs.mkdirSync(productDir, { recursive: true });
+
+            const newImages = files.image.map((file) => {
+                const filename = path.basename(file.path);
+                const newPath = path.join(productDir, filename);
+                fs.renameSync(file.path, newPath);
+
+                return {
+                    newPath: `uploads/magasin/${images.dynamic._id}/${filename}`,
+                    originalFilename: file.originalname,
+                };
+            });
+            imagePaths = [...imagePaths, ...newImages.map((img) => img.newPath)];
+        }
+
+        if (imageDto.remove && Array.isArray(imageDto.remove)) {
+            imagePaths = imagePaths.filter((img) => !imageDto.remove?.includes(img))
+
+            for (const imgPath of imageDto.remove) {
+                const localPath = path.join('.', imgPath); // Make sure the path is correct
+                if (fs.existsSync(localPath)) {
+                    fs.unlinkSync(localPath);
+                }
+            }
+        }
+
+        console.log(imagePaths)
+
+        const updatePayload = {
+            ...imageDto,
+            image: imagePaths,
+        };
+
+        return this.dynamicService.updateImage(id, updatePayload)
+
+
+    }
 }
