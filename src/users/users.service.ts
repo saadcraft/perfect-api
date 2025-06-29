@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
 import { Users } from '../schemas/user.schema';
@@ -42,12 +42,17 @@ export class UsersService {
             if (isMatch) {
                 const userObject = user.toObject();
                 const { password, ...result } = userObject;
-                // console.log(result)
+                const payload = { id: result._id, username: result.username, email: result.email, role: result.role }
                 return {
                     id: userObject._id,
                     username: userObject.username,
                     email: userObject.email,
-                    access_token: this.jwtService.sign(result),
+                    role: userObject.role,
+                    access_token: this.jwtService.sign(payload),
+                    refresh_token: this.jwtService.sign(payload, {
+                        secret: process.env.REFRESH_SECRET_KEY || "DEFAULT=c12fa829caac7fa815da4215ec13c8a2",
+                        expiresIn: '7d',
+                    })
                 };
             }
         }
@@ -58,4 +63,21 @@ export class UsersService {
         return this.userModel.findById(id);
     }
 
+    async refreshUser(refresh_token: string) {
+        try {
+            const decoded = this.jwtService.verify(refresh_token, {
+                secret: process.env.REFRESH_SECRET_KEY || "DEFAULT=c12fa829caac7fa815da4215ec13c8a2",
+            });
+            const payload = { id: decoded.id, username: decoded.username, email: decoded.email, role: decoded.role };
+            const newAccessToken = this.jwtService.sign(payload);
+            const newRefreshToken = this.jwtService.sign(payload, {
+                secret: process.env.REFRESH_SECRET_KEY || "DEFAULT=c12fa829caac7fa815da4215ec13c8a2",
+                expiresIn: '7d',
+            });
+
+            return { access_token: newAccessToken, refresh_token: newRefreshToken };
+        } catch (error) {
+            throw new UnauthorizedException('Invalid refresh token');
+        }
+    }
 }

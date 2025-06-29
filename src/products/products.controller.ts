@@ -1,8 +1,24 @@
-import { BadRequestException, Body, Controller, Delete, Get, HttpException, Param, Patch, Post, Query, UploadedFiles, UseGuards, UseInterceptors, ValidationPipe } from '@nestjs/common';
+import {
+    BadRequestException,
+    Body,
+    Controller,
+    Delete,
+    Get,
+    HttpException,
+    NotFoundException,
+    Param,
+    Patch,
+    Post,
+    Query,
+    UploadedFiles,
+    UseGuards,
+    UseInterceptors,
+    ValidationPipe
+} from '@nestjs/common';
 import { ProductsService, ProductRequest } from "./products.service"
-import { CreateProductDto } from "./dto/product.dto"
+import { CreateProductDto, VariantsDto } from "./dto/product.dto"
 import { Products } from '../schemas/product.schema';
-import { UpdateProductDto } from './dto/update.dto';
+import { UpdateProductDto, VariantUpdateDto } from './dto/update.dto';
 import mongoose from 'mongoose';
 import { JwtAuthGuard } from '../users/jwt/jwt-auth.guard';
 import { Roles } from 'src/users/auth/auth.decorator';
@@ -12,6 +28,7 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from 'src/config/multer.config';
 import * as fs from 'fs';
 import * as path from 'path';
+import { Variants } from 'src/schemas/variants.shema';
 
 @Controller('products')
 export class ProductsController {
@@ -25,7 +42,16 @@ export class ProductsController {
 
     @Get(':id') // GET /products/:id
     findOne(@Param('id') id: string): Promise<Products | null> {
+        const isValid = mongoose.Types.ObjectId.isValid(id);
+        if (!isValid) throw new HttpException('Invalid ID', 400);
         return this.productsService.findOne(id)
+    }
+
+    @Get('variants/:id')
+    findVariants(@Param("id") id: string): Promise<Variants[] | null> {
+        const isValid = mongoose.Types.ObjectId.isValid(id);
+        if (!isValid) throw new HttpException('Invalid ID', 400);
+        return this.productsService.findVariants(id)
     }
 
     @UseGuards(JwtAuthGuard, RolesGuard)
@@ -45,27 +71,37 @@ export class ProductsController {
                 error: 'Bad Request',
             });
         }
-        const images = files.images?.map((file) => file.path) || [];
         try {
+            const images = files.images.map((file) => ({
+                path: file.path,
+                originalFilename: file.originalname, // Store the original filename
+            }));
+
             const newProduct = await this.productsService.create(product);
 
             const productDir = `./uploads/products/${newProduct._id}`;
             fs.mkdirSync(productDir, { recursive: true });
 
-            const imagePaths = images.map((oldPath) => {
-                const filename = path.basename(oldPath);
+            const imagePaths = images.map(({ path: oldPath, originalFilename }) => {
+                const filename = path.basename(oldPath); // Get the generated filename
                 const newPath = path.join(productDir, filename);
-                fs.renameSync(oldPath, newPath); // Write buffer to file
+                fs.renameSync(oldPath, newPath); // Move the file to the new directory
 
-                return `/uploads/products/${newProduct._id}/${filename}`;
+                return {
+                    newPath: `/uploads/products/${newProduct._id}/${filename}`,
+                    originalFilename, // Keep the original filename for reference
+                };
             });
 
-            await this.productsService.update(newProduct.id, { images: imagePaths });
+            const primaryImage = imagePaths.find((img) => img.originalFilename === product.primaryImage)?.newPath || imagePaths[0].newPath;
+
+
+            await this.productsService.update(newProduct.id, { images: imagePaths.map((img) => img.newPath), primaryImage });
             return { ...newProduct.toObject(), images: imagePaths };
         } catch (error) {
             throw new BadRequestException({
                 status: 500,
-                message: error,
+                message: error.message,
                 error: 'Bad Request',
             });
         }
@@ -74,10 +110,80 @@ export class ProductsController {
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.ADMIN)
     @Patch(':id') //PATCH /products
-    update(@Param('id') id: string, @Body(ValidationPipe) proUpdate: UpdateProductDto) {
+    @UseInterceptors(
+        FileFieldsInterceptor([{ name: 'images', maxCount: 5 }], multerOptions),
+    )
+    async update(@Param('id') id: string, @Body(ValidationPipe)
+    proUpdate: UpdateProductDto,
+        @UploadedFiles() files?: { images?: Express.Multer.File[] }
+    ) {
+        // console.log(proUpdate)
         const isValid = mongoose.Types.ObjectId.isValid(id);
         if (!isValid) throw new HttpException('Invalid ID', 400);
-        return this.productsService.update(id, proUpdate)
+
+        const product = await this.productsService.findOne(id);
+        if (!product) throw new NotFoundException('Product not found');
+
+        // let variantsIds = product.variants || [];
+        let imagePaths = product.images || [];
+        let NewprimaryImage: string | null = null
+
+        if (files && files.images && files.images.length > 0) {
+            const productDir = `./uploads/products/${product._id}`;
+            fs.mkdirSync(productDir, { recursive: true });
+
+            const newImages = files.images.map((file) => {
+                const filename = path.basename(file.path);
+                const newPath = path.join(productDir, filename);
+                fs.renameSync(file.path, newPath);
+
+                return {
+                    newPath: `/uploads/products/${product._id}/${filename}`,
+                    originalFilename: file.originalname,
+                };
+            });
+            // Append new image paths
+            imagePaths = [...imagePaths, ...newImages.map((img) => img.newPath)];
+            NewprimaryImage = proUpdate.newPrimaryImage && newImages.find((img) => img.originalFilename === proUpdate.newPrimaryImage)?.newPath || null;
+        }
+        if (proUpdate.removeImage && Array.isArray(proUpdate.removeImage)) {
+            imagePaths = imagePaths.filter((img) => !proUpdate.removeImage?.includes(img))
+
+            for (const imgPath of proUpdate.removeImage) {
+                const localPath = path.join('.', imgPath); // Make sure the path is correct
+                if (fs.existsSync(localPath)) {
+                    fs.unlinkSync(localPath);
+                }
+            }
+        }
+        const primaryImage = proUpdate.oldPrimaryImage || NewprimaryImage || (imagePaths.includes(product.primaryImage) ? product.primaryImage : imagePaths[0]);
+
+        // if (proUpdate.variants || proUpdate.removeVariant) {
+        //     await this.productsService.syncVariants(
+        //         id,
+        //         proUpdate.variants || [],
+        //         proUpdate.removeVariant || []
+        //     );
+        // }
+        // Destructure to remove variants & removeVariant from proUpdate
+
+        const updatePayload = {
+            ...proUpdate,
+            images: imagePaths,
+            primaryImage,
+        };
+
+        return this.productsService.update(id, updatePayload)
+    }
+
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    @Patch('variants/:id')
+    updateVariants(@Param('id') id: string, @Body(ValidationPipe) body: VariantUpdateDto) {
+        const isValid = mongoose.Types.ObjectId.isValid(id);
+        if (!isValid) throw new HttpException('Invalid ID', 400);
+        return this.productsService.updateVariants(id, body);
+
     }
 
     @UseGuards(JwtAuthGuard, RolesGuard)
