@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
 import { Dynamic } from 'src/schemas/dynamic.shema';
@@ -7,7 +7,7 @@ import { HeroPictures } from 'src/schemas/heroPictures.shema';
 import { DynamicDto, ImagesDto } from './dto/dynamic.dto';
 import { Users } from 'src/schemas/user.schema';
 import path from 'path';
-import { UpdateImagesDto } from './dto/updateDynamic.dto';
+import { updateDynamicDto, UpdateImagesDto } from './dto/updateDynamic.dto';
 
 type ImagesType = {
     path: string;
@@ -60,6 +60,51 @@ export class DynamicService {
         // Optionally update user document if needed
 
         return addDynamo;
+    }
+
+    async updateDynamo(id: string, { fqa, removeFqa, ...updateDynamo }: updateDynamicDto) {
+
+        const dynamo = await this.DynamicModel.findById(id);
+        if (!dynamo) throw new NotFoundException('magasin not found');
+
+        if (removeFqa && removeFqa.length > 0) {
+            // Also delete the fqa from the fqa collection
+            await this.FaqModel.deleteMany({
+                _id: { $in: removeFqa.map(ids => new mongoose.Types.ObjectId(ids)) }
+            });
+        }
+
+        const fqaIds: mongoose.Types.ObjectId[] = [];
+        for (const fqas of fqa || []) {
+            if (fqas.id) {
+                // Update existing variant
+                await this.FaqModel.findByIdAndUpdate(new mongoose.Types.ObjectId(fqas.id), fqas);  // Update the variant
+                fqaIds.push(new mongoose.Types.ObjectId(fqas.id));  // Add ObjectId to updatedVariantIds
+            } else {
+                // Create a new variant
+                const created = await this.FaqModel.create(fqas);
+                fqaIds.push(created._id as mongoose.Types.ObjectId);  // Add ObjectId of the newly created variant
+            }
+        }
+
+        // 3. Merge existing variants with the new updated ones and remove the variants that need to be removed
+        const existingVariantIds = dynamo.fqa.map((id) => id.toString());  // Get current variant IDs in string form
+
+        // Filter out the variants that should be removed and that already exist in the product's variants
+        const finalVariantIds = [
+            ...existingVariantIds.filter((id) => !(removeFqa ?? []).includes(id)),  // Remove the variants that are being removed
+            ...fqaIds.map(id => id.toString()).filter(id => !existingVariantIds.includes(id)) // Add new updated variants if not already present
+        ];
+
+        // Convert all string IDs to ObjectId instances
+        const objectIds = finalVariantIds.map(id => new mongoose.Types.ObjectId(id));  // Convert to ObjectId using `new Types.ObjectId(id)`
+
+        // Update the product's variants array with the new list of ObjectId[]s
+        dynamo.fqa = objectIds;
+        await dynamo.save();
+
+        return await this.DynamicModel.findByIdAndUpdate({ _id: id }, updateDynamo, { new: true })
+
     }
 
     async updateImage(id: string, images: UpdateImagesDto) {
