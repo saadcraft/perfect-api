@@ -6,11 +6,7 @@ import { UsersModule } from './users/users.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { OrdersModule } from './orders/orders.module';
-import { WilayaController } from './wilaya/wilaya.controller';
-import { WilayaService } from './wilaya/wilaya.service';
 import { WilayaModule } from './wilaya/wilaya.module';
-import { DynamicService } from './dynamic/dynamic.service';
-import { DynamicController } from './dynamic/dynamic.controller';
 import { DynamicModule } from './dynamic/dynamic.module';
 
 
