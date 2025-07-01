@@ -6,27 +6,35 @@ on:
 
 jobs:
   build:
-
     runs-on: self-hosted
 
     strategy:
       matrix:
         node-version: [22.17.0]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
     env:
-      DB_URI: ${{secrets.DB_URI}}
-      REFRESH_SECRET_KEY: ${{secrets.REFRESH_SECRET_KEY}}
-      SECRET_KEY: ${{secrets.SECRET_KEY}}
+      DB_URI: ${{ secrets.DB_URI }}
+      REFRESH_SECRET_KEY: ${{ secrets.REFRESH_SECRET_KEY }}
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+
     steps:
-    - uses: actions/checkout@v4
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    - run: npm ci
-    - run: npm dedupe
-    - run: npm run build --if-present
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - run: npm ci
+      - run: npm dedupe
+      - run: npm run build --if-present
+
+      # OPTIONAL: Start the app
+      - name: Start app
+        run: |
+          echo "Starting app with DB_URI prefix: ${DB_URI:0:10}"
+          npm run start:prod
 
     # - name: Change Directory
     #   run: cd /home/frandendstartawsil/actions-runner/_work/frontend/frontend
