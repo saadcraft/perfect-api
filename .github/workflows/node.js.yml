@@ -1,0 +1,34 @@
+name: Node.js CI
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: self-hosted
+
+    strategy:
+      matrix:
+        node-version: [22.17.0]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+    env:
+      DB_URI: ${{secrets.DB_URI}}
+      REFRESH_SECRET_KEY: ${{secrets.REFRESH_SECRET_KEY}}
+      NEXT_PUBLIC_WS_SERVER: ${{secrets.WS_SERVER}}
+      SECRET_KEY: ${{secrets.SECRET_KEY}}
+    steps:
+    - uses: actions/checkout@v4
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    - run: npm ci
+    - run: npm dedupe
+    - run: npm run build --if-present
+
+    # - name: Change Directory
+    #   run: cd /home/frandendstartawsil/actions-runner/_work/frontend/frontend
+    # - run: pm2 reload 0 

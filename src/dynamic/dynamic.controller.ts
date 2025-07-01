@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, HttpException, NotFoundException, Param, Patch, Post, Req, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, HttpException, NotFoundException, Param, Patch, Post, Put, Req, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { DynamicService } from './dynamic.service';
 import { DynamicDto } from './dto/dynamic.dto';
 import { JwtAuthGuard } from 'src/users/jwt/jwt-auth.guard';
@@ -10,7 +10,7 @@ import { multerOptions } from 'src/config/multer.config';
 import * as fs from 'fs';
 import * as path from 'path';
 import { Request } from '@nestjs/common';
-import { UpdateImagesDto } from './dto/updateDynamic.dto';
+import { updateDynamicDto, UpdateImagesDto } from './dto/updateDynamic.dto';
 import mongoose from 'mongoose';
 
 @Controller('dynamic')
@@ -77,6 +77,13 @@ export class DynamicController {
 
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.ADMIN)
+    @Put(':id')
+    async update(@Param('id') id: string, @Body() updateDynamo: updateDynamicDto) {
+        return await this.dynamicService.updateDynamo(id, updateDynamo)
+    }
+
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
     @Patch('Image/:id')
     @UseInterceptors(
         FileFieldsInterceptor([{ name: 'image', maxCount: 6 }], multerOptions),
@@ -133,4 +140,6 @@ export class DynamicController {
 
 
     }
+
+
 }
