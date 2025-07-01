@@ -1,47 +1,44 @@
-name: Node.js CI
+name: NestJS Deploy CI
 
 on:
   push:
     branches: [ "main" ]
 
 jobs:
-  build:
+  deploy:
     runs-on: self-hosted
-
-    strategy:
-      matrix:
-        node-version: [22.17.0]
 
     env:
       DB_URI: ${{ secrets.DB_URI }}
-      REFRESH_SECRET_KEY: ${{ secrets.REFRESH_SECRET_KEY }}
       SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      REFRESH_SECRET_KEY: ${{ secrets.REFRESH_SECRET_KEY }}
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Create .env for NestJS
-        run: |
-          echo "DB_URI=${{ secrets.DB_URI }}" >> .env
-          echo "REFRESH_SECRET_KEY=${{ secrets.REFRESH_SECRET_KEY }}" >> .env
-          echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
-
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: '22.17.0'
           cache: 'npm'
 
-      - run: npm ci
-      - run: npm dedupe
-      - run: npm run build --if-present
+      - name: Install dependencies
+        run: npm ci
 
-      # OPTIONAL: Start the app
-      - name: Start app
-        run: |
-          echo "Starting app with DB_URI prefix: ${DB_URI:0:10}"
-          npm run start:prod
+      - name: Deduplicate dependencies
+        run: npm dedupe
 
-    # - name: Change Directory
-    #   run: cd /home/frandendstartawsil/actions-runner/_work/frontend/frontend
-    # - run: pm2 reload 0 
+      - name: Build the project
+        run: npm run build
+
+      - name: Debug DB_URI
+        run: | 
+          echo "Mongo prefix: ${DB_URI:0:10}"  # should print mongodb://
+
+      - name: Start NestJS App
+        run: npm run start:prod
+        env:
+          DB_URI: ${{ secrets.DB_URI }}
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          REFRESH_SECRET_KEY: ${{ secrets.REFRESH_SECRET_KEY }}
