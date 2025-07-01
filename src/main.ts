@@ -8,6 +8,8 @@ import * as cookieParser from 'cookie-parser';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  console.log("env: " + process.env.DB_URI)
+
   app.useGlobalInterceptors(new LoggingInterceptor());
   app.useGlobalFilters(new GlobalExceptionFilter());
   // app.useGlobalPipes(new ValidationPipe({ transform: true }));

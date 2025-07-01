@@ -16,7 +16,6 @@ jobs:
     env:
       DB_URI: ${{secrets.DB_URI}}
       REFRESH_SECRET_KEY: ${{secrets.REFRESH_SECRET_KEY}}
-      NEXT_PUBLIC_WS_SERVER: ${{secrets.WS_SERVER}}
       SECRET_KEY: ${{secrets.SECRET_KEY}}
     steps:
     - uses: actions/checkout@v4
