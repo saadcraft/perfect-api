@@ -15,8 +15,8 @@ jobs:
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
     env:
       DB_URI: ${{ secrets.DB_URI }}
-      REFRESH_SECRET_KEY: ${{ secrets.REFRESH_SECRET_KEY }}
       SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      REFRESH_SECRET_KEY: ${{ secrets.REFRESH_SECRET_KEY }}
       
     steps:
     - name: Debug env presence
