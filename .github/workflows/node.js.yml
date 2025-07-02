@@ -26,11 +26,11 @@ jobs:
         echo "REFRESH_SECRET_KEY set? $([ -n \"$REFRESH_SECRET_KEY\" ] && echo yes || echo no)"
 
     - name: Create .env file
-      run: cd /home/perfect/actions-runner/_work/perfect-api/perfect-api
-    - run: |
-       echo "DB_URI=${{ secrets.DB_URI }}" >> .env
-       echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
-       echo "REFRESH_SECRET_KEY=${{ secrets.REFRESH_SECRET_KEY }}" >> .env
+      run: |
+        echo "DB_URI=${{ secrets.DB_URI }}" > .env
+        echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
+        echo "REFRESH_SECRET_KEY=${{ secrets.REFRESH_SECRET_KEY }}" >> .env
+      working-directory: /home/perfect/actions-runner/_work/perfect-api/perfect-api
 
     - uses: actions/checkout@v4
     - name: Use Node.js ${{ matrix.node-version }}
