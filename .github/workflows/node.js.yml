@@ -19,6 +19,11 @@ jobs:
       REFRESH_SECRET_KEY: ${{ secrets.REFRESH_SECRET_KEY }}
       
     steps:
+    - name: Write .env file for NestJS
+      run: |
+          echo "DB_URI=${{ secrets.DB_URI }}" >> .env
+          echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
+          echo "REFRESH_SECRET_KEY=${{ secrets.REFRESH_SECRET_KEY }}" >> .env
     - name: Debug env presence
       run: |
         echo "::add-mask::$DB_URI"  # keep the value hidden
