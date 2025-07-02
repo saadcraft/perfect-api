@@ -25,12 +25,12 @@ jobs:
         echo "DB_URI length: ${#DB_URI}"
         echo "REFRESH_SECRET_KEY set? $([ -n \"$REFRESH_SECRET_KEY\" ] && echo yes || echo no)"
 
-    - name: Create .env file in safe location
+    - name: Create .env file
       run: |
-        echo "DB_URI=${{ secrets.DB_URI }}" > $GITHUB_WORKSPACE/.env
-        echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> $GITHUB_WORKSPACE/.env
-        echo "REFRESH_SECRET_KEY=${{ secrets.REFRESH_SECRET_KEY }}" >> $GITHUB_WORKSPACE/.env
-
+        echo "DB_URI=${{ secrets.DB_URI }}" >> .env
+        echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
+        echo "REFRESH_SECRET_KEY=${{ secrets.REFRESH_SECRET_KEY }}" >> .env
+        
     - uses: actions/checkout@v4
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
