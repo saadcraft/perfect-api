@@ -26,6 +26,6 @@ async function bootstrap() {
     credentials: true,
   });
 
-  await app.listen(process.env.PORT ?? 8000);
+  await app.listen(8001, '0.0.0.0'); // NOT 'localhost'
 }
 bootstrap();
