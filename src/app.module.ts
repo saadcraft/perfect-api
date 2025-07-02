@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ProductsModule } from './products/products.module';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
@@ -10,11 +10,12 @@ import { WilayaModule } from './wilaya/wilaya.module';
 import { DynamicModule } from './dynamic/dynamic.module';
 
 
-console.log("test" + process.env.DB_URI)
+console.log("test " + process.env.REFRESH_SECRET_KEY)
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      ignoreEnvFile: true, // good for GitHub Actions!
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'uploads'), // Serve the uploads folder
@@ -31,4 +32,8 @@ console.log("test" + process.env.DB_URI)
   controllers: [],
   providers: [],
 })
-export class AppModule { }
+export class AppModule {
+  constructor(private readonly configService: ConfigService) {
+    console.log("REFRESH_SECRET_KEY:", this.configService.get('REFRESH_SECRET_KEY'));
+  }
+}
