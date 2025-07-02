@@ -14,9 +14,9 @@ jobs:
         node-version: [22.17.0]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
     env:
-      DB_URI: ${{secrets.DB_URI}}
-      REFRESH_SECRET_KEY: ${{secrets.REFRESH_SECRET_KEY}}
-      SECRET_KEY: ${{secrets.SECRET_KEY}}
+      DB_URI: ${{ secrets.DB_URI }}
+      REFRESH_SECRET_KEY: ${{ secrets.REFRESH_SECRET_KEY }}
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
       
     steps:
     - uses: actions/checkout@v4

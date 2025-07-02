@@ -20,8 +20,8 @@ console.log("test" + process.env.DB_URI)
       rootPath: join(__dirname, '..', 'uploads'), // Serve the uploads folder
       serveRoot: '/uploads', // Base URL for static files
     }),
-    // MongooseModule.forRoot(process.env.DB_URI || ""),
-    MongooseModule.forRoot("mongodb://perfectAdmin:PIratage@1996@127.0.0.1:27017/perfectdb?authSource=perfectdb"),
+    MongooseModule.forRoot(process.env.DB_URI || ""),
+    // MongooseModule.forRoot("mongodb://perfectAdmin:PIratage@1996@127.0.0.1:27017/perfectdb?authSource=perfectdb"),
     ProductsModule,
     UsersModule,
     OrdersModule,
