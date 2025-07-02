@@ -10,12 +10,11 @@ import { WilayaModule } from './wilaya/wilaya.module';
 import { DynamicModule } from './dynamic/dynamic.module';
 
 
-console.log("test " + process.env.REFRESH_SECRET_KEY)
+console.log("test " + process.env.DB_URI)
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      ignoreEnvFile: true, // good for GitHub Actions!
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'uploads'), // Serve the uploads folder
