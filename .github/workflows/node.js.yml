@@ -36,5 +36,5 @@ jobs:
     - run: npm run build --if-present
 
     - name: Change Directory
-      run: cd /home/perfect/actions-runner/_work/perfect-room/perfect-room
+      run: cd /home/perfect/actions-runner/_work/perfect-api/perfect-api
     - run: pm2 reload 0 
