@@ -10,7 +10,7 @@ import { WilayaModule } from './wilaya/wilaya.module';
 import { DynamicModule } from './dynamic/dynamic.module';
 
 
-console.log("test " + process.env.DB_URI)
+// console.log("test " + process.env.DB_URI)
 @Module({
   imports: [
     ConfigModule.forRoot({

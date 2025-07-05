@@ -35,6 +35,6 @@ jobs:
     - run: npm dedupe
     - run: npm run build --if-present
 
-    # - name: Change Directory
-    #   run: cd /home/frandendstartawsil/actions-runner/_work/frontend/frontend
-    # - run: pm2 reload 0 
+    - name: Change Directory
+      run: cd /home/perfect/actions-runner/_work/perfect-room/perfect-room
+    - run: pm2 reload 0 
