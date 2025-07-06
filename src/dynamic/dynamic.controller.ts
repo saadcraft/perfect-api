@@ -59,7 +59,7 @@ export class DynamicController {
 
             const newDynamic = await this.dynamicService.create(images, dynamikDto, req);
 
-            const productDir = `./uploads/magasin/${newDynamic.id}/`;
+            const productDir = `${process.env.UPLOAD_DIR}/magasin/${newDynamic.id}/`;
             fs.mkdirSync(productDir, { recursive: true });
 
             images.map(({ path: oldPath }) => {
@@ -109,7 +109,7 @@ export class DynamicController {
         let imagePaths = images.image || [];
 
         if (files && files.image && files.image.length > 0) {
-            const productDir = `./uploads/magasin/${images.dynamic._id}`;
+            const productDir = `${process.env.UPLOAD_DIR}/magasin/${images.dynamic._id}`;
             fs.mkdirSync(productDir, { recursive: true });
 
             const newImages = files.image.map((file) => {

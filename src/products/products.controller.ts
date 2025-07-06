@@ -79,7 +79,7 @@ export class ProductsController {
 
             const newProduct = await this.productsService.create(product);
 
-            const productDir = `/srv/uploads/products/${newProduct._id}`;
+            const productDir = `${process.env.UPLOAD_DIR}/products/${newProduct._id}`;
             fs.mkdirSync(productDir, { recursive: true });
 
             const imagePaths = images.map(({ path: oldPath, originalFilename }) => {
@@ -129,7 +129,7 @@ export class ProductsController {
         let NewprimaryImage: string | null = null
 
         if (files && files.images && files.images.length > 0) {
-            const productDir = `./uploads/products/${product._id}`;
+            const productDir = `${process.env.UPLOAD_DIR}/products/${product._id}`;
             fs.mkdirSync(productDir, { recursive: true });
 
             const newImages = files.images.map((file) => {
