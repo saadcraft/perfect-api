@@ -4,9 +4,8 @@ import mongoose from 'mongoose';
 import { Dynamic } from 'src/schemas/dynamic.shema';
 import { Fqa } from 'src/schemas/fqa.shema';
 import { HeroPictures } from 'src/schemas/heroPictures.shema';
-import { DynamicDto, ImagesDto } from './dto/dynamic.dto';
+import { DynamicDto } from './dto/dynamic.dto';
 import { Users } from 'src/schemas/user.schema';
-import path from 'path';
 import { updateDynamicDto, UpdateImagesDto } from './dto/updateDynamic.dto';
 
 type ImagesType = {
@@ -28,7 +27,14 @@ export class DynamicService {
     async findAll() {
         return this.DynamicModel.find().populate([
             { path: 'fqa', model: 'Fqa' },
-            { path: 'heroPictures', model: 'heroPictures' }
+            { path: 'heroPictures', model: 'HeroPictures' }
+        ]);
+    }
+
+    async findOne(id: string) {
+        return this.DynamicModel.findById({ _id: id }).populate([
+            { path: 'fqa', model: 'Fqa' },
+            { path: 'heroPictures', model: 'HeroPictures' }
         ]);
     }
 

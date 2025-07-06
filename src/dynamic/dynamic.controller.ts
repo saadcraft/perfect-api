@@ -24,6 +24,13 @@ export class DynamicController {
 
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.ADMIN)
+    @Get(':id')
+    findOne(@Param('id') id: string) {
+        return this.dynamicService.findOne(id);
+    }
+
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
     @Post()
     @UseInterceptors(
         FileFieldsInterceptor([{ name: 'heroPictures', maxCount: 6 }], multerOptions),

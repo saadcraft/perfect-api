@@ -79,7 +79,7 @@ export class ProductsController {
 
             const newProduct = await this.productsService.create(product);
 
-            const productDir = `./uploads/products/${newProduct._id}`;
+            const productDir = `/srv/uploads/products/${newProduct._id}`;
             fs.mkdirSync(productDir, { recursive: true });
 
             const imagePaths = images.map(({ path: oldPath, originalFilename }) => {

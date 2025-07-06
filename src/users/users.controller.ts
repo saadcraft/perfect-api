@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, UseGuards, ValidationPipe, Req, Res } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards, ValidationPipe, Req, Res } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { UsersService } from './users.service';
 import { CreatUserDto } from './dto/creatUser.dto';
@@ -8,6 +8,13 @@ import { JwtAuthGuard } from './jwt/jwt-auth.guard';
 @Controller('users')
 export class UsersController {
     constructor(private readonly usersService: UsersService) { }
+
+    @Get()
+    @UseGuards(JwtAuthGuard)
+    getUser(@Req() req: Request) {
+        const userId = (req.user as any)?.id || (req.user as any)?._id;
+        return this.usersService.getUser(userId)
+    }
 
     @Post('register')
     create(@Body(ValidationPipe) user: CreatUserDto) {
@@ -39,12 +46,6 @@ export class UsersController {
         res.clearCookie('access_token');
         res.clearCookie('refresh_token');
         return { message: 'Logged out' };
-    }
-
-    @Get(':id')
-    @UseGuards(JwtAuthGuard)
-    getUser(@Param('id') id: string) {
-        return this.usersService.getUser(id)
     }
 
     @Post('refresh')
