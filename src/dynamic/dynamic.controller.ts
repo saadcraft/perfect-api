@@ -73,6 +73,8 @@ export class DynamicController {
                 // };
             });
 
+            return newDynamic
+
         } catch (error) {
             throw new BadRequestException({
                 status: 500,
