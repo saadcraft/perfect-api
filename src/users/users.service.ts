@@ -1,6 +1,7 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
+import { MongoServerError } from 'mongodb';
 import { Users } from '../schemas/user.schema';
 import { CreatUserDto } from './dto/creatUser.dto';
 import { Profile } from '../schemas/profile.schema';
@@ -21,7 +22,6 @@ export class UsersService {
 
         const saltRounds = 10; // Number of salt rounds for bcrypt
         const hashedPassword = await bcrypt.hash(user.password, saltRounds);
-
         // Replace the plain password with the hashed password
         user.password = hashedPassword;
 
@@ -32,7 +32,14 @@ export class UsersService {
                 profile: newProfil._id,
             })
         }
-        return this.userModel.create(user)
+        try {
+            return await this.userModel.create(user)
+        } catch (error) {
+            if (error instanceof MongoServerError && error.code === 11000) {
+                throw new ConflictException(`Username or email already exists.`);
+            }
+            throw new InternalServerErrorException('Something went wrong');
+        }
     }
 
     async validateUser({ username, password }: AuthPayloadDto): Promise<any> {
