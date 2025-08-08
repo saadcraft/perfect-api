@@ -8,9 +8,9 @@ import { join } from 'path';
 import { OrdersModule } from './orders/orders.module';
 import { WilayaModule } from './wilaya/wilaya.module';
 import { DynamicModule } from './dynamic/dynamic.module';
+import { SocketsModule } from './gateway/events.module';
 
 
-// console.log("test " + process.env.DB_URI)
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -21,18 +21,17 @@ import { DynamicModule } from './dynamic/dynamic.module';
       serveRoot: '/uploads', // Base URL for static files
     }),
     MongooseModule.forRoot(process.env.DB_URI || ""),
-    // MongooseModule.forRoot("mongodb://perfectAdmin:PIratage@1996@127.0.0.1:27017/perfectdb?authSource=perfectdb"),
     ProductsModule,
     UsersModule,
     OrdersModule,
     WilayaModule,
     DynamicModule,
+    SocketsModule
   ],
   controllers: [],
   providers: [],
 })
 export class AppModule {
   constructor(private readonly configService: ConfigService) {
-    console.log("REFRESH_SECRET_KEY:", this.configService.get('REFRESH_SECRET_KEY'));
   }
 }
