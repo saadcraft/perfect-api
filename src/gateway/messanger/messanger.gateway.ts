@@ -73,7 +73,7 @@ export class MessangerSocket {
         this.server.to(recipientSocketId).emit("privateMessage", {
             from: sender.userId,
             text: payload.text,
-            timestamp: new Date(),
+            timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
             isOwn: false
         });
 
@@ -81,8 +81,25 @@ export class MessangerSocket {
         client.emit("privateMessage", {
             from: sender.userId,
             text: payload.text,
-            timestamp: new Date(),
+            timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
             isOwn: true
         });
+    }
+
+    @SubscribeMessage('typing')
+    handleTyping(
+        @MessageBody() data: { chatId: string; username: string },
+        @ConnectedSocket() client: Socket
+    ) {
+        client.broadcast.to(data.chatId).emit('userTyping', { user: data.username, chatId: data.chatId });
+    }
+
+    // User stops typing
+    @SubscribeMessage('stopTyping')
+    handleStopTyping(
+        @MessageBody() data: { chatId: string; username: string },
+        @ConnectedSocket() client: Socket
+    ) {
+        client.broadcast.to(data.chatId).emit('userStopTyping', { user: data.username, chatId: data.chatId });
     }
 }
