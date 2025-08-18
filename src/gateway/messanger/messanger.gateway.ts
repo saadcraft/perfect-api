@@ -91,7 +91,20 @@ export class MessangerSocket {
         @MessageBody() data: { chatId: string; username: string },
         @ConnectedSocket() client: Socket
     ) {
-        client.broadcast.to(data.chatId).emit('userTyping', { user: data.username, chatId: data.chatId });
+        const sender = this.connectedUsers.get(client.id);
+        if (!sender) return;
+
+        // Find recipient by userId (search the map values)
+        const recipientEntry = Array.from(this.connectedUsers.entries())
+            .find(([_, user]) => user.userId === data.chatId);
+
+        if (!recipientEntry) {
+            console.log("Recipient not found or offline");
+            return;
+        }
+
+        const [recipientSocketId, recipient] = recipientEntry;
+        client.broadcast.to(recipientSocketId).emit('userTyping', { user: data.username, chatId: sender.userId });
     }
 
     // User stops typing
@@ -100,6 +113,19 @@ export class MessangerSocket {
         @MessageBody() data: { chatId: string; username: string },
         @ConnectedSocket() client: Socket
     ) {
-        client.broadcast.to(data.chatId).emit('userStopTyping', { user: data.username, chatId: data.chatId });
+        const sender = this.connectedUsers.get(client.id);
+        if (!sender) return;
+
+        // Find recipient by userId (search the map values)
+        const recipientEntry = Array.from(this.connectedUsers.entries())
+            .find(([_, user]) => user.userId === data.chatId);
+
+        if (!recipientEntry) {
+            console.log("Recipient not found or offline");
+            return;
+        }
+
+        const [recipientSocketId, recipient] = recipientEntry;
+        client.broadcast.to(recipientSocketId).emit('userStopTyping', { user: data.username, chatId: sender.userId });
     }
 }

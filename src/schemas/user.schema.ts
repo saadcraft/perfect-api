@@ -4,6 +4,8 @@ import { Document, Types } from 'mongoose';
 export enum Role {
     ADMIN = 'ADMIN',
     USER = 'USER',
+    MAGASINE = 'MAGASINE',
+    DELIVERY = 'DELIVERY',
 }
 
 
