@@ -32,6 +32,9 @@ export class Users extends Document {
     @Prop({ default: false }) // Indicates if the user's email is verified
     isEmailVerified: boolean;
 
+    @Prop({ default: true })
+    isActive: boolean;
+
     @Prop({ default: false }) // Indicates if the user's phone number is verified
     isPhoneVerified: boolean;
 
@@ -39,7 +42,7 @@ export class Users extends Document {
     profile: Types.ObjectId;
 
     @Prop({ type: Types.ObjectId, ref: "Dynamic" })
-    dynamics: Types.ObjectId
+    dynamics: Types.ObjectId;
 }
 
 export const UserSchema = SchemaFactory.createForClass(Users);
