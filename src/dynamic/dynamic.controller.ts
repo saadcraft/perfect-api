@@ -22,12 +22,18 @@ export class DynamicController {
         return this.dynamicService.findAll()
     }
 
+    @Get('magasine')
+    async getMagasineDynamics() {
+        return this.dynamicService.findAllMagasineDynamics();
+    }
+
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(Role.ADMIN)
+    @Roles(Role.ADMIN, Role.MAGASINE)
     @Get(':id')
     findOne(@Param('id') id: string) {
         return this.dynamicService.findOne(id);
     }
+
 
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.ADMIN, Role.MAGASINE)
@@ -99,7 +105,7 @@ export class DynamicController {
 
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.ADMIN, Role.MAGASINE)
-    @Patch('Image/:id')
+    @Patch('image/:id')
     @UseInterceptors(
         FileFieldsInterceptor([
             { name: 'image', maxCount: 6 },
