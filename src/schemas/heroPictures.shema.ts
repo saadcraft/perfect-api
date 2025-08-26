@@ -6,6 +6,12 @@ export class HeroPictures extends Document {
     @Prop({ required: false })
     title: string;
 
+    @Prop({ required: false })
+    mainPicture: string;
+
+    @Prop({ required: false })
+    coverPicture: string;
+
     @Prop({ required: true })
     image: string[];
 
