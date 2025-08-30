@@ -27,8 +27,7 @@ export class DynamicController {
         return this.dynamicService.findAllMagasineDynamics();
     }
 
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(Role.ADMIN, Role.MAGASINE)
+    @UseGuards(JwtAuthGuard)
     @Get(':id')
     findOne(@Param('id') id: string) {
         return this.dynamicService.findOne(id);

@@ -10,6 +10,7 @@ import {
     Patch,
     Post,
     Query,
+    Req,
     UploadedFiles,
     UseGuards,
     UseInterceptors,
@@ -47,6 +48,8 @@ export class ProductsController {
         return this.productsService.findOne(id)
     }
 
+
+
     @Get('variants/:id')
     findVariants(@Param("id") id: string): Promise<Variants[] | null> {
         const isValid = mongoose.Types.ObjectId.isValid(id);
@@ -55,7 +58,7 @@ export class ProductsController {
     }
 
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(Role.ADMIN)
+    @Roles(Role.ADMIN, Role.MAGASINE)
     @Post() //POST /products
     @UseInterceptors(
         FileFieldsInterceptor([{ name: 'images', maxCount: 5 }], multerOptions),
@@ -108,7 +111,7 @@ export class ProductsController {
     }
 
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(Role.ADMIN)
+    @Roles(Role.ADMIN, Role.MAGASINE)
     @Patch(':id') //PATCH /products
     @UseInterceptors(
         FileFieldsInterceptor([{ name: 'images', maxCount: 5 }], multerOptions),
@@ -177,7 +180,7 @@ export class ProductsController {
     }
 
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(Role.ADMIN)
+    @Roles(Role.ADMIN, Role.MAGASINE)
     @Patch('variants/:id')
     updateVariants(@Param('id') id: string, @Body(ValidationPipe) body: VariantUpdateDto) {
         const isValid = mongoose.Types.ObjectId.isValid(id);

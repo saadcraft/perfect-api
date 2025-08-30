@@ -45,7 +45,7 @@ export class Products extends Document {
   promotion: number;
 
   @Prop({ type: Types.ObjectId, ref: "Dynamic" })
-  Dynamic: Types.ObjectId;
+  dynamic: Types.ObjectId;
 
   @Prop({ default: 0 })
   rate: number;

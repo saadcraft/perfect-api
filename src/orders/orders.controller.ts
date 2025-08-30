@@ -13,7 +13,7 @@ export class OrdersController {
     constructor(private readonly ordersService: OrdersService) { }
 
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(Role.ADMIN)
+    @Roles(Role.ADMIN, Role.MAGASINE)
     @Get("all") //Get get all orders for ADMIN
     findAll(@Query('user') user: string, @Query('phoneNumber') number: string, @Query('status') status: string, @Query('page') page: number): Promise<OrderRequest | null> {
         return this.ordersService.findAll({ number, user, status }, page);

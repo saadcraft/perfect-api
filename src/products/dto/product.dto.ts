@@ -65,4 +65,6 @@ export class CreateProductDto {
     @Type(() => VariantsDto)
     variants: VariantsDto[];
 
+    @IsMongoId()
+    dynamic: string;
 }
