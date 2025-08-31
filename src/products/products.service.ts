@@ -45,6 +45,27 @@ export class ProductsService {
         }
     }
 
+    async findMagasinProduct(req: PayloadType, filters: { title?: string; category?: string }, page?: number): Promise<ProductRequest> {
+        const skip = (page ? page - 1 : 0) * limit; // Calculate the offset
+        const query: { [key: string]: any } = {};
+        if (filters.category && filters.category.trim()) {
+            query.category = filters.category.trim();
+        }
+        if (filters.title && filters.title.trim()) {
+            const searchTerm = filters.title.trim();
+            const regexPattern = searchTerm.split('').join('.*'); // Basic approximation for fuzzy matching
+            query.title = { $regex: regexPattern, $options: 'i' };
+        }
+        const data = await this.productModel.find({ ...query, available: true, dynamic: req.dynamic }).sort({ createdAt: -1 }).skip(skip).limit(limit);
+        const total = await this.productModel.countDocuments({ ...query, available: true, dynamic: req.dynamic });
+        return {
+            total,
+            page: Number(page) || 1,
+            totalPages: Math.ceil(total / limit),
+            result: data,
+        }
+    }
+
     async findOne(id: string): Promise<Products | null> {
         return this.productModel.findById(id).populate({ path: 'variants', model: 'Variants' });
     }
@@ -53,10 +74,11 @@ export class ProductsService {
         return this.ProductVariants.find({ product: new mongoose.Types.ObjectId(id) });
     }
 
-    async create(product: CreateProductDto, images?: string[]) {
+    async create(product: CreateProductDto, req: PayloadType, images?: string[]) {
         // 1. Create the product first
         const createdProduct = await this.productModel.create({
             ...product,
+            dynamic: req.dynamic,
             images
         });
 

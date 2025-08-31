@@ -42,7 +42,7 @@ export class Users extends Document {
     profile: Types.ObjectId;
 
     @Prop({ type: Types.ObjectId, ref: "Dynamic" })
-    dynamics: Types.ObjectId;
+    dynamic: Types.ObjectId;
 }
 
 export const UserSchema = SchemaFactory.createForClass(Users);
