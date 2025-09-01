@@ -24,7 +24,7 @@ export class ProductsService {
         @InjectModel(Variants.name) private readonly ProductVariants: mongoose.Model<Variants>,
     ) { }
 
-    async findAll(filters: { title?: string; category?: string }, page?: number): Promise<ProductRequest> {
+    async findAll(filters: { title?: string; category?: string }, dynamic?: string, page?: number): Promise<ProductRequest> {
         const skip = (page ? page - 1 : 0) * limit; // Calculate the offset
         const query: { [key: string]: any } = {};
         if (filters.category && filters.category.trim()) {
@@ -35,6 +35,10 @@ export class ProductsService {
             const regexPattern = searchTerm.split('').join('.*'); // Basic approximation for fuzzy matching
             query.title = { $regex: regexPattern, $options: 'i' };
         }
+        if (dynamic) {
+            query.dynamic = dynamic;
+        }
+
         const data = await this.productModel.find({ ...query, available: true }).sort({ createdAt: -1 }).skip(skip).limit(limit);
         const total = await this.productModel.countDocuments({ ...query, available: true });
         return {

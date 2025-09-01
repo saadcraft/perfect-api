@@ -38,15 +38,26 @@ export class ProductsController {
     constructor(private readonly productsService: ProductsService) { }
 
     @Get() // GET /products
-    findAll(@Query('category') category: string, @Query('title') title: string, @Query('page') page: number): Promise<ProductRequest> {
-        return this.productsService.findAll({ title, category }, page);
+    findAll(
+        @Query('category') category: string,
+        @Query('title') title: string,
+        @Query('dynamic') dynamic: string,
+        @Query('page') page: number
+    ): Promise<ProductRequest> {
+        return this.productsService.findAll({ title, category }, dynamic, page);
     }
 
     @UseGuards(JwtAuthGuard)
     @Get('app')
-    findApp(@Query('category') category: string, @Query('title') title: string, @Query('page') page: number, @Req() req: Request): Promise<ProductRequest> {
+    findApp(
+        @Query('category') category: string,
+        @Query('title') title: string,
+        @Query('dynamic') dynamic: string,
+        @Query('page') page: number,
+        @Req() req: Request
+    ): Promise<ProductRequest> {
         if (req.user && (req.user as PayloadType).role === Role.USER) {
-            return this.productsService.findAll({ title, category }, page);
+            return this.productsService.findAll({ title, category }, dynamic, page);
         }
         return this.productsService.findMagasinProduct(req.user as PayloadType, { title, category }, page)
     }

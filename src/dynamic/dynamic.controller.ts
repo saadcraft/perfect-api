@@ -140,7 +140,7 @@ export class DynamicController {
             const filename = path.basename(file.path);
             const newPath = path.join(productDir, filename);
             fs.renameSync(file.path, newPath);
-            return `uploads/magasin/${images.dynamic._id}/${filename}`;
+            return `/uploads/magasin/${images.dynamic._id}/${filename}`;
         };
 
         // if (files && files.image && files.image.length > 0) {

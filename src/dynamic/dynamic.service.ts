@@ -51,7 +51,7 @@ export class DynamicService {
         const addFqa = await this.FaqModel.insertMany(fqa.map(pre => ({ ...pre })));
 
         const addImage = await this.HeroPicturesModel.create({
-            image: images.map(pre => `uploads/magasin/${addDynamo.id}/${pre.fileName}`),
+            image: images.map(pre => `/uploads/magasin/${addDynamo.id}/${pre.fileName}`),
             dynamic: addDynamo.id
         });
 
