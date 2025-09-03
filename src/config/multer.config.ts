@@ -22,7 +22,7 @@ export const multerOptions = {
     },
   }),
   fileFilter: (req, file, cb) => {
-    const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/svg'];
+    const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/svg', 'image/webp'];
     if (allowedMimeTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {

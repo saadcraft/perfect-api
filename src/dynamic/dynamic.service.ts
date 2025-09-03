@@ -46,12 +46,12 @@ export class DynamicService {
         // Get user id from request (assuming JWT or session)
         const userId = req.user?.id || req.user?._id;
 
-        const addDynamo = await this.DynamicModel.create({ ...dynamikDto });
+        const addDynamo = await this.DynamicModel.create({ ...dynamikDto, owner: userId });
 
         const addFqa = await this.FaqModel.insertMany(fqa.map(pre => ({ ...pre })));
 
         const addImage = await this.HeroPicturesModel.create({
-            image: images.map(pre => `uploads/magasin/${addDynamo.id}/${pre.fileName}`),
+            image: images.map(pre => `/uploads/magasin/${addDynamo.id}/${pre.fileName}`),
             dynamic: addDynamo.id
         });
 
@@ -115,6 +115,21 @@ export class DynamicService {
 
     async updateImage(id: string, images: UpdateImagesDto) {
         return await this.HeroPicturesModel.findByIdAndUpdate({ _id: id }, images, { new: true });
+    }
+
+    async findAllMagasineDynamics() {
+        return this.DynamicModel
+            .find()
+            .populate({
+                path: 'owner',
+                match: { role: 'MAGASINE' }, // Only users with MAGASINE role
+                select: '_id' // Select only specific fields
+            })
+            .populate({
+                path: 'heroPictures',
+                model: 'HeroPictures'
+            })
+            .then(dynamics => dynamics.filter(d => d.owner)); // remove dynamics with no matching owner
     }
 
 }

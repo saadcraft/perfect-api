@@ -10,11 +10,13 @@ import {
     Patch,
     Post,
     Query,
+    Req,
     UploadedFiles,
     UseGuards,
     UseInterceptors,
     ValidationPipe
 } from '@nestjs/common';
+import { Request } from 'express';
 import { ProductsService, ProductRequest } from "./products.service"
 import { CreateProductDto, VariantsDto } from "./dto/product.dto"
 import { Products } from '../schemas/product.schema';
@@ -36,8 +38,28 @@ export class ProductsController {
     constructor(private readonly productsService: ProductsService) { }
 
     @Get() // GET /products
-    findAll(@Query('category') category: string, @Query('title') title: string, @Query('page') page: number): Promise<ProductRequest> {
-        return this.productsService.findAll({ title, category }, page);
+    findAll(
+        @Query('category') category: string,
+        @Query('title') title: string,
+        @Query('dynamic') dynamic: string,
+        @Query('page') page: number
+    ): Promise<ProductRequest> {
+        return this.productsService.findAll({ title, category }, dynamic, page);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Get('app')
+    findApp(
+        @Query('category') category: string,
+        @Query('title') title: string,
+        @Query('dynamic') dynamic: string,
+        @Query('page') page: number,
+        @Req() req: Request
+    ): Promise<ProductRequest> {
+        if (req.user && (req.user as PayloadType).role === Role.USER) {
+            return this.productsService.findAll({ title, category }, dynamic, page);
+        }
+        return this.productsService.findMagasinProduct(req.user as PayloadType, { title, category }, page)
     }
 
     @Get(':id') // GET /products/:id
@@ -55,13 +77,14 @@ export class ProductsController {
     }
 
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(Role.ADMIN)
+    @Roles(Role.ADMIN, Role.MAGASINE)
     @Post() //POST /products
     @UseInterceptors(
         FileFieldsInterceptor([{ name: 'images', maxCount: 5 }], multerOptions),
     )
     async create(
         @Body(ValidationPipe) product: CreateProductDto,
+        @Req() req: Request,
         @UploadedFiles() files?: { images?: Express.Multer.File[] },
     ) {
         if (!files || !files.images || files.images.length === 0) {
@@ -77,7 +100,9 @@ export class ProductsController {
                 originalFilename: file.originalname, // Store the original filename
             }));
 
-            const newProduct = await this.productsService.create(product);
+            console.log(req.user);
+
+            const newProduct = await this.productsService.create(product, req.user as PayloadType);
 
             const productDir = `${process.env.UPLOAD_DIR}/products/${newProduct._id}`;
             fs.mkdirSync(productDir, { recursive: true });
@@ -108,7 +133,7 @@ export class ProductsController {
     }
 
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(Role.ADMIN)
+    @Roles(Role.ADMIN, Role.MAGASINE)
     @Patch(':id') //PATCH /products
     @UseInterceptors(
         FileFieldsInterceptor([{ name: 'images', maxCount: 5 }], multerOptions),
@@ -177,7 +202,7 @@ export class ProductsController {
     }
 
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(Role.ADMIN)
+    @Roles(Role.ADMIN, Role.MAGASINE)
     @Patch('variants/:id')
     updateVariants(@Param('id') id: string, @Body(ValidationPipe) body: VariantUpdateDto) {
         const isValid = mongoose.Types.ObjectId.isValid(id);

@@ -17,6 +17,12 @@ export class Dynamic extends Document {
 
     @Prop({ type: Types.ObjectId, ref: "HeroPictures" })
     heroPictures: Types.ObjectId;
+
+    @Prop({ required: false })
+    address: string;
+
+    @Prop({ type: Types.ObjectId, ref: 'Users', required: true })
+    owner: Types.ObjectId;
 }
 
 export const DynamicSchema = SchemaFactory.createForClass(Dynamic);

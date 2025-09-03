@@ -49,7 +49,13 @@ export class UsersService {
             if (isMatch) {
                 const userObject = user.toObject();
                 const { password, ...result } = userObject;
-                const payload = { id: result._id, username: result.username, email: result.email, role: result.role }
+                const payload = {
+                    id: result._id,
+                    username: result.username,
+                    email: result.email,
+                    role: result.role,
+                    dynamic: userObject.dynamic
+                }
                 return {
                     id: userObject._id,
                     username: userObject.username,
@@ -75,7 +81,13 @@ export class UsersService {
             const decoded = this.jwtService.verify(refresh_token, {
                 secret: process.env.REFRESH_SECRET_KEY || "DEFAULT=c12fa829caac7fa815da4215ec13c8a2",
             });
-            const payload = { id: decoded.id, username: decoded.username, email: decoded.email, role: decoded.role };
+            const payload = {
+                id: decoded.id,
+                username: decoded.username,
+                email: decoded.email,
+                role: decoded.role,
+                dynamic: decoded.dynamic
+            };
             const newAccessToken = this.jwtService.sign(payload);
             const newRefreshToken = this.jwtService.sign(payload, {
                 secret: process.env.REFRESH_SECRET_KEY || "DEFAULT=c12fa829caac7fa815da4215ec13c8a2",

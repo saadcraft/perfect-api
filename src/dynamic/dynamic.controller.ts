@@ -22,15 +22,20 @@ export class DynamicController {
         return this.dynamicService.findAll()
     }
 
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(Role.ADMIN)
+    @Get('magasine')
+    async getMagasineDynamics() {
+        return this.dynamicService.findAllMagasineDynamics();
+    }
+
+    @UseGuards(JwtAuthGuard)
     @Get(':id')
     findOne(@Param('id') id: string) {
         return this.dynamicService.findOne(id);
     }
 
+
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(Role.ADMIN)
+    @Roles(Role.ADMIN, Role.MAGASINE)
     @Post()
     @UseInterceptors(
         FileFieldsInterceptor([{ name: 'heroPictures', maxCount: 6 }], multerOptions),
@@ -40,38 +45,44 @@ export class DynamicController {
         @Req() req: Request,
         @UploadedFiles() files?: { heroPictures?: Express.Multer.File[] }
     ) {
-        if (!files || !files.heroPictures || files.heroPictures.length <= 3) {
-            throw new BadRequestException({
-                status: 400,
-                message: 'At least three image is required',
-                error: 'Bad Request',
-            });
-        }
+        // if (!files || !files.heroPictures || files.heroPictures.length <= 3) {
+        //     throw new BadRequestException({
+        //         status: 400,
+        //         message: 'At least three image is required',
+        //         error: 'Bad Request',
+        //     });
+        // }
 
         try {
-            const images = files.heroPictures.map((file) => ({
-                path: file.path,
-                originalFilename: file.originalname, // Store the original filename
-                fileName: file.filename
-            }));
+            let images: { path: string; originalFilename: string; fileName: string }[] = [];
+
+            if (files?.heroPictures?.length) {
+                images = files.heroPictures.map((file) => ({
+                    path: file.path,
+                    originalFilename: file.originalname,
+                    fileName: file.filename,
+                }));
+            }
 
             // console.log(images)
 
             const newDynamic = await this.dynamicService.create(images, dynamikDto, req);
 
-            const productDir = `${process.env.UPLOAD_DIR}/magasin/${newDynamic.id}/`;
-            fs.mkdirSync(productDir, { recursive: true });
+            if (images.length > 0) {
+                const productDir = `${process.env.UPLOAD_DIR}/magasin/${newDynamic.id}/`;
+                fs.mkdirSync(productDir, { recursive: true });
 
-            images.map(({ path: oldPath }) => {
-                const filename = path.basename(oldPath); // Get the generated filename
-                const newPath = path.join(productDir, filename);
-                fs.renameSync(oldPath, newPath); // Move the file to the new directory
+                images.forEach(({ path: oldPath }) => {
+                    const filename = path.basename(oldPath);
+                    const newPath = path.join(productDir, filename);
+                    fs.renameSync(oldPath, newPath);
+                });
+            }
 
-                // return {
-                //     newPath: `/uploads/magasin/${newDynamic._id}/${filename}`,
-                //     originalFilename, // Keep the original filename for reference
-                // };
-            });
+            // return {
+            //     newPath: `/uploads/magasin/${newDynamic._id}/${filename}`,
+            //     originalFilename, // Keep the original filename for reference
+            // };
 
             return newDynamic
 
@@ -92,15 +103,24 @@ export class DynamicController {
     }
 
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(Role.ADMIN)
-    @Patch('Image/:id')
+    @Roles(Role.ADMIN, Role.MAGASINE)
+    @Patch('image/:id')
     @UseInterceptors(
-        FileFieldsInterceptor([{ name: 'image', maxCount: 6 }], multerOptions),
+        FileFieldsInterceptor([
+            { name: 'image', maxCount: 6 },
+            { name: 'mainPicture', maxCount: 1 },    // single main picture
+            { name: 'coverPicture', maxCount: 1 }
+        ],
+            multerOptions),
     )
     async updateImage(
         @Param('id') id: string,
         @Body() imageDto: UpdateImagesDto,
-        @UploadedFiles() files?: { image?: Express.Multer.File[] }
+        @UploadedFiles() files?: {
+            image?: Express.Multer.File[];
+            mainPicture?: Express.Multer.File[];
+            coverPicture?: Express.Multer.File[];
+        }
     ) {
         const isValid = mongoose.Types.ObjectId.isValid(id);
         if (!isValid) throw new HttpException('Invalid ID', 400);
@@ -109,22 +129,49 @@ export class DynamicController {
         if (!images) throw new NotFoundException('image not found');
 
         let imagePaths = images.image || [];
+        let mainPicture = images.mainPicture || null;
+        let coverPicture = images.coverPicture || null;
 
-        if (files && files.image && files.image.length > 0) {
-            const productDir = `${process.env.UPLOAD_DIR}/magasin/${images.dynamic._id}`;
-            fs.mkdirSync(productDir, { recursive: true });
+        const productDir = `${process.env.UPLOAD_DIR}/magasin/${images.dynamic._id}`;
+        fs.mkdirSync(productDir, { recursive: true });
 
-            const newImages = files.image.map((file) => {
-                const filename = path.basename(file.path);
-                const newPath = path.join(productDir, filename);
-                fs.renameSync(file.path, newPath);
+        // Helper to move file and return path
+        const saveFile = (file: Express.Multer.File) => {
+            const filename = path.basename(file.path);
+            const newPath = path.join(productDir, filename);
+            fs.renameSync(file.path, newPath);
+            return `/uploads/magasin/${images.dynamic._id}/${filename}`;
+        };
 
-                return {
-                    newPath: `uploads/magasin/${images.dynamic._id}/${filename}`,
-                    originalFilename: file.originalname,
-                };
-            });
-            imagePaths = [...imagePaths, ...newImages.map((img) => img.newPath)];
+        // if (files && files.image && files.image.length > 0) {
+        //     const productDir = `${process.env.UPLOAD_DIR}/magasin/${images.dynamic._id}`;
+        //     fs.mkdirSync(productDir, { recursive: true });
+
+        //     const newImages = files.image.map((file) => {
+        //         const filename = path.basename(file.path);
+        //         const newPath = path.join(productDir, filename);
+        //         fs.renameSync(file.path, newPath);
+
+        //         return {
+        //             newPath: `uploads/magasin/${images.dynamic._id}/${filename}`,
+        //             originalFilename: file.originalname,
+        //         };
+        //     });
+        //     imagePaths = [...imagePaths, ...newImages.map((img) => img.newPath)];
+        // }
+        if (files?.image?.length) {
+            const newImages = files.image.map(saveFile);
+            imagePaths = [...imagePaths, ...newImages];
+        }
+
+        // ✅ handle mainPicture
+        if (files?.mainPicture?.[0]) {
+            mainPicture = saveFile(files.mainPicture[0]);
+        }
+
+        // ✅ handle coverPicture
+        if (files?.coverPicture?.[0]) {
+            coverPicture = saveFile(files.coverPicture[0]);
         }
 
         if (imageDto.remove && Array.isArray(imageDto.remove)) {
@@ -143,6 +190,8 @@ export class DynamicController {
         const updatePayload = {
             ...imageDto,
             image: imagePaths,
+            mainPicture: mainPicture ?? undefined,
+            coverPicture: coverPicture ?? undefined
         };
 
         return this.dynamicService.updateImage(id, updatePayload)

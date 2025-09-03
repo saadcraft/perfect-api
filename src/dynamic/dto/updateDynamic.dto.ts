@@ -6,6 +6,14 @@ export class UpdateImagesDto {
     @IsOptional()
     image?: string[];
 
+    @IsString()
+    @IsOptional()
+    mainPicture?: string;
+
+    @IsString()
+    @IsOptional()
+    coverPicture?: string;
+
     @IsArray()
     @IsOptional()
     remove?: string[];
