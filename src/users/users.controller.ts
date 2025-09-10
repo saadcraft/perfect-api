@@ -28,15 +28,19 @@ export class UsersController {
         res.cookie('access_token', req.user.access_token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            sameSite: 'none',
             maxAge: 60 * 60 * 1000, // 60 minutes
+            domain: "localhost"
+
         });
 
         res.cookie('refresh_token', req.user.refresh_token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            sameSite: 'none',
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+            domain: "localhost"
+
         });
         return req.user;
     }
