@@ -88,4 +88,8 @@ export class orderInfoDto {
     // @Transform(({ value }) => Array(value))
     @Type(() => OrderDto)
     orders: OrderDto[];
+
+    @IsMongoId()
+    @IsNotEmpty()
+    dynamic: string;
 }

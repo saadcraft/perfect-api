@@ -40,6 +40,9 @@ export class OrderInformation extends Document {
 
     @Prop({ type: Types.ObjectId, ref: "Users", required: false })
     user: Types.ObjectId;
+
+    @Prop({ type: Types.ObjectId, ref: "Dynamic" })
+    dynamic: Types.ObjectId;
 }
 
 export const OrderInfoSchema = SchemaFactory.createForClass(OrderInformation);

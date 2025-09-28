@@ -6,6 +6,7 @@ import { Orders } from 'src/schemas/orders.shema';
 import { orderInfoDto } from './dto/creatOrderDto';
 import { updateOrderDto } from './dto/updateOrderDto';
 import { Parsonalizer } from 'src/schemas/personalizer';
+import { StoreSocket } from 'src/gateway/store/store.gateway';
 
 export type OrderRequest = {
     total: number;
@@ -23,6 +24,7 @@ export class OrdersService {
         @InjectModel(OrderInformation.name) private readonly OrderInfoModel: mongoose.Model<OrderInformation>,
         @InjectModel(Orders.name) private readonly OrdersModel: mongoose.Model<Orders>,
         @InjectModel(Parsonalizer.name) private readonly PersonalizerModel: mongoose.Model<Parsonalizer>,
+        private readonly storeSocket: StoreSocket
     ) { }
 
     async findByClient(phoneNumber: string, page?: number): Promise<OrderRequest | null> {
@@ -95,6 +97,42 @@ export class OrdersService {
         }
     }
 
+    async findByMagasine(req: PayloadType, filters: { number?: string; user?: string; status?: string }, page?: number): Promise<OrderRequest | null> {
+        const skip = (page ? page - 1 : 0) * limit; // Calculate the offset
+        const query: { [key: string]: any } = {};
+        if (filters.user?.trim()) {
+            query.user = filters.user.trim();
+        }
+        if (filters.status?.trim()) {
+            query.status = filters.status.trim();
+        }
+
+        if (filters.number?.trim()) {
+            const searchTerm = filters.number.trim();
+            const regexPattern = searchTerm.split('').join('.*');
+            query.phoneNumber = { $regex: regexPattern, $options: 'i' };
+        }
+        if (req) {
+            query.dynamic = req.dynamic;
+        }
+
+        console.log(query)
+        const [data, total] = await Promise.all([
+            this.OrderInfoModel.find(query)
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit)
+                .populate({ path: 'orders', model: 'Orders' }),
+            this.OrderInfoModel.countDocuments(query)
+        ]);
+        return {
+            total,
+            page: Number(page) || 1,
+            totalPages: Math.ceil(total / limit),
+            result: data,
+        }
+    }
+
     async create({ orders, ...orderinfo }: orderInfoDto) {
         const createdOrderInfo = await this.OrderInfoModel.create(orderinfo);
 
@@ -113,8 +151,10 @@ export class OrdersService {
             parsonalizer: personalizerId
         })));
 
+
         createdOrderInfo.orders = createOrders.map(o => o._id as mongoose.Types.ObjectId);
         await createdOrderInfo.save();
+        this.storeSocket.notifyOrderCreated({ orders, ...orderinfo });
 
         return createdOrderInfo;
 
