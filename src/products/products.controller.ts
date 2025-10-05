@@ -62,12 +62,18 @@ export class ProductsController {
         return this.productsService.findMagasinProduct(req.user as PayloadType, { title, category }, page)
     }
 
+    @Post('variants')
+    findProductByVariant(@Body() body: { ids: string[] }) {
+        return this.productsService.variantFindProduct(body.ids)
+    }
+
     @Get(':id') // GET /products/:id
     findOne(@Param('id') id: string): Promise<Products | null> {
         const isValid = mongoose.Types.ObjectId.isValid(id);
         if (!isValid) throw new HttpException('Invalid ID', 400);
         return this.productsService.findOne(id)
     }
+
 
     @Get('variants/:id')
     findVariants(@Param("id") id: string): Promise<Variants[] | null> {

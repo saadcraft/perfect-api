@@ -30,9 +30,10 @@ export class StoreSocket {
                 status: "En attente"
             })
                 .then(pendingOrders => {
-                    pendingOrders.forEach(order => {
-                        this.server.to(magasinRoom).emit("order_created", order);
-                    });
+                    // pendingOrders.forEach(order => {
+                    //     this.server.to(magasinRoom).emit("order_created", order);
+                    // });
+                    this.server.to(magasinRoom).emit("order_created", pendingOrders);
                 });
 
 

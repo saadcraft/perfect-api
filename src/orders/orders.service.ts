@@ -54,6 +54,10 @@ export class OrdersService {
                         populate: {
                             path: 'product',
                             model: 'Products',
+                            populate: {
+                                path: 'dynamic',
+                                model: 'Dynamic'
+                            }
                         },
 
                     },
@@ -65,6 +69,35 @@ export class OrdersService {
             },
         ]);
     }
+
+    // async findManyByOrders(ids: string[]): Promise<OrderInformation[]> {
+    //     return this.OrderInfoModel.find({
+    //         _id: { $in: ids },
+    //     }).populate([
+    //         {
+    //             path: 'orders',
+    //             model: 'Orders',
+    //             populate: [
+    //                 {
+    //                     path: 'variant',
+    //                     model: 'Variants',
+    //                     populate: {
+    //                         path: 'product',
+    //                         model: 'Products',
+    //                         populate: {
+    //                             path: 'dynamic',
+    //                             model: 'Dynamic',
+    //                         },
+    //                     },
+    //                 },
+    //                 {
+    //                     path: 'parsonalizer',
+    //                     model: 'Parsonalizer',
+    //                 },
+    //             ],
+    //         },
+    //     ]);
+    // }
 
     async findAll(filters: { number?: string; user?: string; status?: string }, page?: number): Promise<OrderRequest | null> {
         const skip = (page ? page - 1 : 0) * limit; // Calculate the offset
@@ -116,7 +149,7 @@ export class OrdersService {
             query.dynamic = req.dynamic;
         }
 
-        console.log(query)
+        // console.log(query)
         const [data, total] = await Promise.all([
             this.OrderInfoModel.find(query)
                 .sort({ createdAt: -1 })

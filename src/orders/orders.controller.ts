@@ -41,6 +41,11 @@ export class OrdersController {
         return this.ordersService.findByOrder(id);
     }
 
+    // @Get("app")
+    // findOrders(@Body() ids: string[]) {
+    //     return this.ordersService.findManyByOrders(ids)
+    // }
+
     @Post() //POST /orders
     async create(@Body(ValidationPipe) order: orderInfoDto) {
         return this.ordersService.create(order)
