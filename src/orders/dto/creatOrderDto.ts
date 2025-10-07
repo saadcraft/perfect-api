@@ -1,5 +1,5 @@
 import { Transform, Type } from "class-transformer";
-import { ArrayMinSize, IsArray, IsEmail, IsMongoId, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator";
+import { ArrayMinSize, IsArray, IsEmail, IsMongoId, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateIf, ValidateNested } from "class-validator";
 import { AtLeastOneNotEmpty } from "src/config/at-least-one-not-empty.decorator";
 
 
@@ -58,18 +58,22 @@ export class OrderDto {
 }
 
 export class orderInfoDto {
+    @ValidateIf(o => !o.user)
     @IsString()
     @IsNotEmpty({ message: "le Nom et Prénom ne doit pas être vide" })
     fullname: string;
+
 
     @IsString()
     @IsNotEmpty({ message: "le Numéro ne doit pas être vide" })
     phoneNumber: string;
 
+    @ValidateIf(o => !o.user)
     @IsString()
     @IsNotEmpty({ message: "la Wilaya ne doit pas être vide" })
     wilaya: string;
 
+    @ValidateIf(o => !o.user)
     @IsString()
     @IsNotEmpty({ message: "l'adresse ne doit pas être vide" })
     adresse: string;

@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { Document } from "mongoose";
+import { Document, Types } from "mongoose";
 
 
 
@@ -23,6 +23,9 @@ export class Profile extends Document {
 
     @Prop({ required: false })
     avatar: string;
+
+    @Prop({ type: Types.ObjectId, ref: "Users" })
+    user: Types.ObjectId;
 }
 
 export const ProfileSchema = SchemaFactory.createForClass(Profile);

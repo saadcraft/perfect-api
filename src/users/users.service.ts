@@ -1,13 +1,14 @@
-import { ConflictException, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
 import { MongoServerError } from 'mongodb';
 import { Users } from '../schemas/user.schema';
-import { CreatUserDto } from './dto/creatUser.dto';
+import { CreatUserDto, ProfileDto } from './dto/creatUser.dto';
 import { Profile } from '../schemas/profile.schema';
 import * as bcrypt from 'bcrypt';
 import { AuthPayloadDto } from './dto/authUser.dto';
 import { JwtService } from '@nestjs/jwt';
+import { UpdateUserDto } from './dto/updateUser.dto';
 
 @Injectable()
 export class UsersService {
@@ -20,8 +21,7 @@ export class UsersService {
 
     async create({ profile, ...user }: CreatUserDto) {
 
-        const saltRounds = 10; // Number of salt rounds for bcrypt
-        const hashedPassword = await bcrypt.hash(user.password, saltRounds);
+        const hashedPassword = await bcrypt.hash(user.password, 10);
         // Replace the plain password with the hashed password
         user.password = hashedPassword;
 
@@ -40,6 +40,51 @@ export class UsersService {
             }
             throw new InternalServerErrorException('Something went wrong');
         }
+    }
+
+    async creatProfile(id: string, profileDto: ProfileDto) {
+        const user = await this.userModel.findById(id)
+        if (!user) throw new NotFoundException('User not found');
+
+        const profile = await this.userProfile.create({ ...profileDto, user: user._id })
+
+        user.profile = profile._id as mongoose.Types.ObjectId
+
+        await user.save()
+
+        return profile;
+    }
+
+    async update(id: string, updateUserDto: UpdateUserDto) {
+        const user = await this.userModel.findById(id).populate('profile');
+        if (!user) throw new NotFoundException('User not found');
+        if (updateUserDto.oldPassowrd && updateUserDto.password) {
+            const isMatch = await bcrypt.compare(updateUserDto.oldPassowrd, user.password);
+            if (!isMatch) throw new Error('Old password is incorrect');
+            user.password = await bcrypt.hash(updateUserDto.password, 10);
+        }
+
+        // 🔹 Update simple user fields (email, number, etc.)
+        const { oldPassowrd, password, profile, ...restUserFields } = updateUserDto;
+
+        const definedUserFields = Object.fromEntries(
+            Object.entries(restUserFields).filter(([_, value]) => value !== undefined)
+        );
+
+        Object.assign(user, definedUserFields);
+
+        // 🔹 Update profile if provided
+        if (profile && user.profile) {
+            const definedProfileFields = Object.fromEntries(
+                Object.entries(profile).filter(([_, value]) => value !== undefined)
+            );
+
+            Object.assign(user.profile, definedProfileFields);
+            await (user.profile as any).save();
+        }
+
+        await user.save();
+        return user.populate('profile');
     }
 
     async validateUser({ username, password }: AuthPayloadDto): Promise<any> {
@@ -74,6 +119,11 @@ export class UsersService {
 
     async getUser(id: string) {
         return this.userModel.findById(id);
+    }
+
+    async getProfile(id: string) {
+        const user = await this.userModel.findById(id) as unknown as UsersType;
+        return this.userProfile.findById(user.profile)
     }
 
     async refreshUser(refresh_token: string) {

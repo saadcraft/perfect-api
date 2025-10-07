@@ -1,3 +1,13 @@
+type UsersType = {
+    _id?: string;
+    username?: string;
+    email?: string;
+    number: string;
+    role: 'ADMIN' | 'USER' | 'MAGASINE';
+    dynamics: string | null;
+    profile: string | null;
+}
+
 type PayloadType = {
     id: string;
     username: string;

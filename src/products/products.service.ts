@@ -72,7 +72,14 @@ export class ProductsService {
     }
 
     async findOne(id: string): Promise<Products | null> {
-        return this.productModel.findById(id).populate({ path: 'variants', model: 'Variants' });
+        return this.productModel.findById(id).populate([
+            { path: 'variants', model: 'Variants' },
+            {
+                path: 'dynamic', model: 'Dynamic', populate: {
+                    path: 'heroPictures', model: 'HeroPictures'
+                }
+            }
+        ]);
     }
 
     async findVariants(id: string): Promise<Variants[] | null> {

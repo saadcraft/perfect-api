@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Post, UseGuards, ValidationPipe, Req, Res } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards, ValidationPipe, Req, Res, Patch } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { UsersService } from './users.service';
-import { CreatUserDto } from './dto/creatUser.dto';
+import { CreatUserDto, ProfileDto } from './dto/creatUser.dto';
 import { LocalAuthGuard } from './jwt/local-auth.guard';
 import { JwtAuthGuard } from './jwt/jwt-auth.guard';
+import { UpdateUserDto } from './dto/updateUser.dto';
 
 @Controller('users')
 export class UsersController {
@@ -14,6 +15,13 @@ export class UsersController {
     getUser(@Req() req: Request) {
         const userId = (req.user as any)?.id || (req.user as any)?._id;
         return this.usersService.getUser(userId)
+    }
+
+    @Get('profile')
+    @UseGuards(JwtAuthGuard)
+    async getProfile(@Req() req: Request) {
+        const userId = (req.user as any)?.id || (req.user as any)?._id;
+        return this.usersService.getProfile(userId)
     }
 
     @Post('register')
@@ -68,6 +76,20 @@ export class UsersController {
         });
 
         return refresh;
+    }
+
+    @Post('profile')
+    @UseGuards(JwtAuthGuard)
+    async CreateProfile(@Req() req: Request, @Body(ValidationPipe) createProfile: ProfileDto) {
+        const userId = (req.user as any)?.id || (req.user as any)?._id;
+        return this.usersService.creatProfile(userId, createProfile)
+    }
+
+    @Patch(':id')
+    @UseGuards(JwtAuthGuard)
+    async UpdateUser(@Req() req: Request, @Body(ValidationPipe) userUpdate: UpdateUserDto) {
+        const userId = (req.user as any)?.id || (req.user as any)?._id;
+        return this.usersService.update(userId, userUpdate)
     }
 
 }

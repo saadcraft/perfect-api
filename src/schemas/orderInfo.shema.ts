@@ -14,16 +14,16 @@ export enum Statue {
     timestamps: true,
 })
 export class OrderInformation extends Document {
-    @Prop({ required: true })
+    @Prop({ required: false })
     fullname: string;
 
     @Prop({ required: true })
     phoneNumber: string;
 
-    @Prop({ required: true })
+    @Prop({ required: false })
     wilaya: string;
 
-    @Prop({ required: true })
+    @Prop({ required: false })
     adresse: string;
 
     @Prop({ required: false })
@@ -38,7 +38,7 @@ export class OrderInformation extends Document {
     @Prop({ type: [{ type: Types.ObjectId, ref: "Orders" }] })
     orders: Types.ObjectId[];
 
-    @Prop({ type: Types.ObjectId, ref: "Users", required: false })
+    @Prop({ type: Types.ObjectId, ref: "Profile", required: false })
     user: Types.ObjectId;
 
     @Prop({ type: Types.ObjectId, ref: "Dynamic" })

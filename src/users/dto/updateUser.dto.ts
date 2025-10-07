@@ -1,7 +1,8 @@
 import { Type } from "class-transformer";
-import { IsEmail, IsNotEmpty, IsOptional, IsString, Matches, MinLength } from "class-validator";
+import { IsEmail, IsOptional, IsString, Matches, MinLength, ValidateNested } from "class-validator";
 
-export class ProfileDto {
+export class UpdateProfileDto {
+
     @IsOptional()
     @IsString()
     firstname: string;
@@ -27,27 +28,31 @@ export class ProfileDto {
     avatar: string;
 }
 
-export class CreatUserDto {
-    @IsNotEmpty()
-    @IsString()
-    username: string;
+export class UpdateUserDto {
 
-    @IsNotEmpty()
+    @IsOptional()
     @IsEmail()
     email: string;
 
-    @IsNotEmpty()
+    @IsOptional()
     @IsString()
     @Matches(/^\+[1-9]\d{1,14}$/, {
         message: 'Phone number must be a valid international number (e.g., +1234567890).',
     }) // Regex for international phone numbers
     number: string;
 
-    @IsNotEmpty()
+    @IsOptional()
+    @IsString()
+    @MinLength(8, { message: 'Password must be at least 8 characters long.' })
+    oldPassowrd: string;
+
+    @IsOptional()
     @IsString()
     @MinLength(8, { message: 'Password must be at least 8 characters long.' })
     password: string;
 
-    @Type(() => ProfileDto)
-    profile: ProfileDto;
+    @IsOptional()
+    @ValidateNested({ each: true })
+    @Type(() => UpdateProfileDto)
+    profile: UpdateProfileDto;
 }
