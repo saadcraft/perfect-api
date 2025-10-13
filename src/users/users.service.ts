@@ -123,7 +123,13 @@ export class UsersService {
 
     async getProfile(id: string) {
         const user = await this.userModel.findById(id) as unknown as UsersType;
-        return this.userProfile.findById(user.profile)
+        const profile = await this.userProfile.findById(user.profile)
+
+        if (!profile) {
+            throw new NotFoundException('User not found');
+        }
+
+        return profile;
     }
 
     async refreshUser(refresh_token: string) {

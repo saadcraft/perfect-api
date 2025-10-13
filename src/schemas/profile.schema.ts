@@ -18,6 +18,15 @@ export class Profile extends Document {
     @Prop({ required: false })
     address: string;
 
+    @Prop({ required: false })
+    phone: string;
+
+    @Prop({ required: false })
+    longitude: string;
+
+    @Prop({ required: false })
+    latitude: string;
+
     @Prop({ type: Date, required: false })
     birthday: Date;
 

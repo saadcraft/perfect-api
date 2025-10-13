@@ -1,5 +1,5 @@
-import { Type } from "class-transformer";
-import { IsEmail, IsNotEmpty, IsOptional, IsString, Matches, MinLength } from "class-validator";
+import { Transform, Type } from "class-transformer";
+import { IsEmail, IsNotEmpty, IsNumber, IsOptional, IsString, Matches, MinLength } from "class-validator";
 
 export class ProfileDto {
     @IsOptional()
@@ -13,6 +13,23 @@ export class ProfileDto {
     @IsOptional()
     @IsString()
     wilaya: string;
+
+    @IsOptional()
+    @IsString()
+    @Matches(/^\+[1-9]\d{1,14}$/, {
+        message: 'Phone number must be a valid international number (e.g., +1234567890).',
+    }) // Regex for international phone numbers
+    phone: string;
+
+    @IsOptional()
+    @Transform(({ value }) => Number(value))
+    @IsNumber()
+    longitude: string;
+
+    @IsOptional()
+    @Transform(({ value }) => Number(value))
+    @IsNumber()
+    latitude: string;
 
     @IsOptional()
     @IsString()

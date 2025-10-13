@@ -58,6 +58,11 @@ export class OrderDto {
 }
 
 export class orderInfoDto {
+
+    @IsOptional()
+    @IsMongoId()
+    user: string;
+
     @ValidateIf(o => !o.user)
     @IsString()
     @IsNotEmpty({ message: "le Nom et Prénom ne doit pas être vide" })
@@ -82,9 +87,6 @@ export class orderInfoDto {
     @IsEmail()
     email: string;
 
-    @IsOptional()
-    @IsMongoId()
-    user: string;
 
     @IsArray()
     @ArrayMinSize(1, { message: 'At least one order is required' })

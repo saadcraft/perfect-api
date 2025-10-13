@@ -85,7 +85,7 @@ export class UsersController {
         return this.usersService.creatProfile(userId, createProfile)
     }
 
-    @Patch(':id')
+    @Patch()
     @UseGuards(JwtAuthGuard)
     async UpdateUser(@Req() req: Request, @Body(ValidationPipe) userUpdate: UpdateUserDto) {
         const userId = (req.user as any)?.id || (req.user as any)?._id;
