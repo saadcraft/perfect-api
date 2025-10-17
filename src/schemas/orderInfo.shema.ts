@@ -36,7 +36,7 @@ export class OrderInformation extends Document {
     tracking: string;
 
     @Prop({ type: [{ type: Types.ObjectId, ref: "Orders" }] })
-    orders: Types.ObjectId[];
+    items: Types.ObjectId[];
 
     @Prop({ type: Types.ObjectId, ref: "Profile", required: false })
     user: Types.ObjectId;

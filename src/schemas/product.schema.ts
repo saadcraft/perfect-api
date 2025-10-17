@@ -1,14 +1,14 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 
-export enum Category {
-  FOODS = 'foods',
-  FETES = 'fétes',
-  MEDICAL = 'médical',
-  BEAUTY = 'beauty',
-  SPORT = 'sport',
-  GAMING = 'gaming'
-}
+// export enum Category {
+//   FOODS = 'foods',
+//   FETES = 'fétes',
+//   MEDICAL = 'médical',
+//   BEAUTY = 'beauty',
+//   SPORT = 'sport',
+//   GAMING = 'gaming'
+// }
 
 @Schema({
   timestamps: true,
@@ -20,8 +20,8 @@ export class Products extends Document {
   @Prop({ required: true })
   description: string;
 
-  @Prop({ required: true })
-  category: Category;
+  @Prop({ type: Types.ObjectId, required: true })
+  category: Types.ObjectId;
 
   @Prop({ required: true })
   lowPrice: number;

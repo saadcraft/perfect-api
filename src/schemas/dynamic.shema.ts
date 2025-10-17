@@ -21,6 +21,9 @@ export class Dynamic extends Document {
     @Prop({ required: false })
     address: string;
 
+    @Prop({ type: [{ type: Types.ObjectId, ref: 'Categories' }], required: false })
+    categories: Types.ObjectId[]
+
     @Prop({ type: Types.ObjectId, ref: 'Users', required: true })
     owner: Types.ObjectId;
 }

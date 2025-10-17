@@ -185,7 +185,7 @@ export class OrdersService {
         })));
 
 
-        createdOrderInfo.orders = createOrders.map(o => o._id as mongoose.Types.ObjectId);
+        createdOrderInfo.items = createOrders.map(o => o._id as mongoose.Types.ObjectId);
         await createdOrderInfo.save();
         this.storeSocket.notifyOrderCreated({ orders, ...orderinfo });
 

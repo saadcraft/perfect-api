@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { UpdateProductDto, VariantUpdateDto } from './dto/update.dto'
-import { CreateProductDto } from './dto/product.dto'
+import { CategoryDto, CreateProductDto } from './dto/product.dto'
 import { InjectModel } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { Products } from '../schemas/product.schema';
 import { Variants } from 'src/schemas/variants.shema';
 import { generateCombinationsFromOptions } from 'src/config/options';
 import path from 'path';
+import { Categories } from 'src/schemas/categories.shema';
 
 export type ProductRequest = {
     total: number;
@@ -23,6 +24,7 @@ export class ProductsService {
     constructor(
         @InjectModel(Products.name) private readonly productModel: mongoose.Model<Products>,
         @InjectModel(Variants.name) private readonly ProductVariants: mongoose.Model<Variants>,
+        @InjectModel(Categories.name) private readonly ProductCategorie: mongoose.Model<Categories>,
     ) { }
 
     async findAll(filters: { title?: string; category?: string }, dynamic?: string, page?: number): Promise<ProductRequest> {
@@ -154,8 +156,17 @@ export class ProductsService {
         return updatedVariants;
     }
 
+    async creatCategorie(data: CategoryDto) {
+        return this.ProductCategorie.create(data)
+    }
+
+    async getCategories() {
+        return this.ProductCategorie.find()
+    }
+
     async delete(id: string) {
         return this.productModel.findByIdAndDelete(id);
     }
+
 
 }

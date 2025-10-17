@@ -28,7 +28,7 @@ export class StoreSocket {
             this.orderModel.find({
                 dynamic: socket.data.user.dynamic,
                 status: "En attente"
-            })
+            }).populate({ path: 'user', model: 'Profile', select: 'firstname lastname' })
                 .then(pendingOrders => {
                     // pendingOrders.forEach(order => {
                     //     this.server.to(magasinRoom).emit("order_created", order);
@@ -55,7 +55,7 @@ export class StoreSocket {
     // Helper method to notify from services
     notifyOrderCreated(order: orderInfoDto) {
 
-        console.log(order)
+        // console.log(order)
         const magasinRoom = `magasin_${order.dynamic}`;
         this.server.to(magasinRoom).emit('order_created', order);
 

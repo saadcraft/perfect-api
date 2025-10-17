@@ -68,7 +68,7 @@ export class orderInfoDto {
     @IsNotEmpty({ message: "le Nom et Prénom ne doit pas être vide" })
     fullname: string;
 
-
+    @ValidateIf(o => !o.user)
     @IsString()
     @IsNotEmpty({ message: "le Numéro ne doit pas être vide" })
     phoneNumber: string;

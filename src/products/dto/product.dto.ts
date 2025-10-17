@@ -29,6 +29,15 @@ export class VariantsDto {
     price: number;
 }
 
+export class CategoryDto {
+
+    @IsString()
+    categorie: string;
+
+    @IsString()
+    name: string;
+}
+
 export class CreateProductDto {
     @IsString()
     @IsNotEmpty({ message: "le titre ne doit pas être vide" })

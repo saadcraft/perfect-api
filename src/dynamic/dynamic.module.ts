@@ -7,6 +7,7 @@ import { Dynamic, DynamicSchema } from 'src/schemas/dynamic.shema';
 import { Fqa, FqaSchema } from 'src/schemas/fqa.shema';
 import { HeroPictures, HeroPicturesSchema } from 'src/schemas/heroPictures.shema';
 import { Users, UserSchema } from 'src/schemas/user.schema';
+import { Categories, CategoriesSchema } from 'src/schemas/categories.shema';
 
 @Module({
     imports: [MongooseModule.forFeature([
@@ -14,6 +15,7 @@ import { Users, UserSchema } from 'src/schemas/user.schema';
         { name: Fqa.name, schema: FqaSchema },
         { name: HeroPictures.name, schema: HeroPicturesSchema },
         { name: Users.name, schema: UserSchema },
+        { name: Categories.name, schema: CategoriesSchema }
     ]), UsersModule],
     controllers: [DynamicController],
     providers: [DynamicService],
