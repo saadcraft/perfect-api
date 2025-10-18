@@ -167,7 +167,7 @@ export class OrdersService {
     }
 
     async create({ orders, ...orderinfo }: orderInfoDto) {
-        const createdOrderInfo = await this.OrderInfoModel.create(orderinfo);
+        const createdOrderInfo = await this.OrderInfoModel.create({ ...orderinfo, user: orderinfo.user.id });
 
         let personalizerId: mongoose.Types.ObjectId | null = null;
 

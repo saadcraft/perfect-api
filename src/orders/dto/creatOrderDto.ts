@@ -57,18 +57,31 @@ export class OrderDto {
     price: number;
 }
 
+export class orderUserDto {
+
+    @IsMongoId()
+    id: string;
+
+    @IsString()
+    firstname: string;
+
+    @IsString()
+    lastname: string;
+
+}
+
 export class orderInfoDto {
 
     @IsOptional()
-    @IsMongoId()
-    user: string;
+    @ValidateNested({ each: true })
+    @Type(() => orderUserDto)
+    user: orderUserDto;
 
     @ValidateIf(o => !o.user)
     @IsString()
     @IsNotEmpty({ message: "le Nom et Prénom ne doit pas être vide" })
     fullname: string;
 
-    @ValidateIf(o => !o.user)
     @IsString()
     @IsNotEmpty({ message: "le Numéro ne doit pas être vide" })
     phoneNumber: string;
