@@ -155,7 +155,40 @@ export class OrdersService {
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limit)
-                .populate({ path: 'orders', model: 'Orders' }),
+                .populate({ path: 'items', model: 'Orders' }),
+            this.OrderInfoModel.countDocuments(query)
+        ]);
+        return {
+            total,
+            page: Number(page) || 1,
+            totalPages: Math.ceil(total / limit),
+            result: data,
+        }
+    }
+
+    async findByUser(req: PayloadType, filters: { number?: string; status?: string }, page?: number): Promise<OrderRequest | null> {
+        const skip = (page ? page - 1 : 0) * limit; // Calculate the offset
+        const query: { [key: string]: any } = {};
+        if (filters.status?.trim()) {
+            query.status = filters.status.trim();
+        }
+
+        if (filters.number?.trim()) {
+            const searchTerm = filters.number.trim();
+            const regexPattern = searchTerm.split('').join('.*');
+            query.phoneNumber = { $regex: regexPattern, $options: 'i' };
+        }
+        if (req) {
+            query.user = req.profile;
+        }
+
+        // console.log(query)
+        const [data, total] = await Promise.all([
+            this.OrderInfoModel.find(query)
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit)
+                .populate({ path: 'items', model: 'Orders' }),
             this.OrderInfoModel.countDocuments(query)
         ]);
         return {

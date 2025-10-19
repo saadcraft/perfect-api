@@ -14,6 +14,7 @@ type PayloadType = {
     email: string;
     role: string;
     dynamic: string;
+    profile: string;
 }
 
 type Parsonalizer = {
@@ -41,6 +42,7 @@ type OrderInfo = {
     wilaya: string;
     adresse: string;
     email?: string;
+    user?: string;
     status: string;
     tracking?: string;
     orders: Order[];

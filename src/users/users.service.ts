@@ -99,7 +99,8 @@ export class UsersService {
                     username: result.username,
                     email: result.email,
                     role: result.role,
-                    dynamic: userObject.dynamic
+                    dynamic: userObject.dynamic,
+                    profile: userObject.profile
                 }
                 return {
                     id: userObject._id,
@@ -142,7 +143,8 @@ export class UsersService {
                 username: decoded.username,
                 email: decoded.email,
                 role: decoded.role,
-                dynamic: decoded.dynamic
+                dynamic: decoded.dynamic,
+                profile: decoded.profile
             };
             const newAccessToken = this.jwtService.sign(payload);
             const newRefreshToken = this.jwtService.sign(payload, {

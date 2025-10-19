@@ -14,18 +14,18 @@ export class OrdersController {
     constructor(private readonly ordersService: OrdersService) { }
 
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(Role.ADMIN, Role.MAGASINE)
+    @Roles(Role.MAGASINE, Role.USER)
     @Get() //Get get all orders for ADMIN
     findByMagasine(@Req() req: Request, @Query('user') user: string, @Query('phoneNumber') number: string, @Query('status') status: string, @Query('page') page: number): Promise<OrderRequest | null> {
-        // console.log(req.user);
+        console.log(req.user);
         if (req.user && (req.user as PayloadType).role === Role.USER) {
-            return this.ordersService.findAll({ number, user, status }, page);
+            return this.ordersService.findByUser(req.user as PayloadType, { number, status }, page);
         }
         return this.ordersService.findByMagasine(req.user as PayloadType, { number, user, status }, page);
     }
 
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(Role.ADMIN, Role.MAGASINE)
+    @Roles(Role.ADMIN)
     @Get("all") //Get get all orders for ADMIN
     findAll(@Query('user') user: string, @Query('phoneNumber') number: string, @Query('status') status: string, @Query('page') page: number): Promise<OrderRequest | null> {
         return this.ordersService.findAll({ number, user, status }, page);
