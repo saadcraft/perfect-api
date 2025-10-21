@@ -1,12 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
-import { OrderInformation } from 'src/schemas/orderInfo.shema';
+import { OrderInformation, OrderWithTotal } from 'src/schemas/orderInfo.shema';
 import { Orders } from 'src/schemas/orders.shema';
 import { orderInfoDto } from './dto/creatOrderDto';
 import { updateOrderDto } from './dto/updateOrderDto';
 import { Parsonalizer } from 'src/schemas/personalizer';
 import { StoreSocket } from 'src/gateway/store/store.gateway';
+import { Dynamic } from 'src/schemas/dynamic.shema';
+import path from 'path';
 
 export type OrderRequest = {
     total: number;
@@ -24,6 +26,7 @@ export class OrdersService {
         @InjectModel(OrderInformation.name) private readonly OrderInfoModel: mongoose.Model<OrderInformation>,
         @InjectModel(Orders.name) private readonly OrdersModel: mongoose.Model<Orders>,
         @InjectModel(Parsonalizer.name) private readonly PersonalizerModel: mongoose.Model<Parsonalizer>,
+        @InjectModel(Dynamic.name) private readonly DynamicModel: mongoose.Model<Dynamic>,
         private readonly storeSocket: StoreSocket
     ) { }
 
@@ -42,10 +45,11 @@ export class OrdersService {
 
     }
 
-    async findByOrder(id: string): Promise<OrderInformation | null> {
-        return this.OrderInfoModel.findById(id).populate([
+    async findByOrder(id: string, view?: boolean): Promise<OrderInformation | null> {
+
+        const order = await this.OrderInfoModel.findById(id).populate([
             {
-                path: 'orders',
+                path: 'items',
                 model: 'Orders',
                 populate: [
                     {
@@ -54,20 +58,30 @@ export class OrdersService {
                         populate: {
                             path: 'product',
                             model: 'Products',
-                            populate: {
-                                path: 'dynamic',
-                                model: 'Dynamic'
-                            }
                         },
-
                     },
                     {
                         path: 'parsonalizer',
                         model: 'Parsonalizer',
                     },
-                ]
+                ],
+            },
+            {
+                path: 'dynamic',
+                populate: {
+                    path: 'common'
+                }
             },
         ]);
+
+        if (!order) return null;
+
+        if (view) {
+            order.view = view
+            order.save();
+        }
+
+        return order;
     }
 
     // async findManyByOrders(ids: string[]): Promise<OrderInformation[]> {
@@ -205,19 +219,46 @@ export class OrdersService {
         }
     }
 
-    async create({ orders, ...orderinfo }: orderInfoDto) {
-        const createdOrderInfo = await this.OrderInfoModel.create({ ...orderinfo, user: orderinfo.user.id });
+    async create({ items, ...orderinfo }: orderInfoDto) {
+        const dynamic = await this.DynamicModel.findById(orderinfo.dynamic).populate({
+            path: 'common', populate: {
+                path: 'city'
+            }
+        });
+
+        if (!dynamic) {
+            throw new BadRequestException({
+                status: 400,
+                message: 'Invalide magasine',
+                error: 'Bad Request',
+            });
+        }
+
+        const updatedCommon = await this.DynamicModel.db
+            .collection('commons')
+            .findOneAndUpdate(
+                { _id: dynamic.common._id },
+                { $inc: { count: 1 } },
+                { returnDocument: 'after' }
+            );
+        const prefix = (dynamic?.common as any)?.city?.code_city + (dynamic?.common as any).code_common;
+        const sequence = updatedCommon?.count;
+        const orderId = `${prefix}${String(sequence).padStart(5, '0')}`;
+
+        const total = items.reduce((acc, item) => acc + item.price * item.quantity, 0) + ((dynamic?.common as any)?.price_delivry || 0);
+
+        const createdOrderInfo = await this.OrderInfoModel.create({ ...orderinfo, user: orderinfo.user.id, orderId, total });
 
         let personalizerId: mongoose.Types.ObjectId | null = null;
 
-        for (const order of orders) {
-            if (order.parsonalizer) {
-                const createdPersonalizer = await this.PersonalizerModel.create(order.parsonalizer);
+        for (const item of items) {
+            if (item.parsonalizer) {
+                const createdPersonalizer = await this.PersonalizerModel.create(item.parsonalizer);
                 personalizerId = createdPersonalizer._id as mongoose.Types.ObjectId;
             }
         }
 
-        const createOrders = await this.OrdersModel.insertMany(orders.map(order => ({
+        const createOrders = await this.OrdersModel.insertMany(items.map(order => ({
             ...order,
             orderInfo: createdOrderInfo.id,
             parsonalizer: personalizerId
@@ -226,7 +267,14 @@ export class OrdersService {
 
         createdOrderInfo.items = createOrders.map(o => o._id as mongoose.Types.ObjectId);
         await createdOrderInfo.save();
-        this.storeSocket.notifyOrderCreated({ orders, ...orderinfo });
+        this.storeSocket.notifyOrderCreated({
+            _id: createdOrderInfo._id,
+            orderId, view: false,
+            status: "En attente",
+            items: createdOrderInfo.items,
+            createdAt: createdOrderInfo?.createdAt!,
+            ...orderinfo
+        } as unknown as OrderInformation);
 
         return createdOrderInfo;
 

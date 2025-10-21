@@ -2,7 +2,7 @@ import { InjectModel } from "@nestjs/mongoose";
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from "@nestjs/websockets";
 import { Model } from "mongoose";
 import { Socket, Server } from 'socket.io';
-import { orderInfoDto } from "src/orders/dto/creatOrderDto";
+import { OrderDto, orderInfoDto } from "src/orders/dto/creatOrderDto";
 import { OrderInformation } from "src/schemas/orderInfo.shema";
 
 @WebSocketGateway({
@@ -53,7 +53,7 @@ export class StoreSocket {
     }
 
     // Helper method to notify from services
-    notifyOrderCreated(order: orderInfoDto) {
+    notifyOrderCreated(order: OrderInformation) {
 
         // console.log(order)
         const magasinRoom = `magasin_${order.dynamic}`;

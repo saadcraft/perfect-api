@@ -110,7 +110,7 @@ export class orderInfoDto {
     @ValidateNested({ each: true })
     // @Transform(({ value }) => Array(value))
     @Type(() => OrderDto)
-    orders: OrderDto[];
+    items: OrderDto[];
 
     @IsMongoId()
     @IsNotEmpty()

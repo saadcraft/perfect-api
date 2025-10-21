@@ -10,6 +10,8 @@ export enum Statue {
     RETURNED = 'Retour'
 }
 
+export type OrderWithTotal = OrderInformation & { total: number };
+
 @Schema({
     timestamps: true,
 })
@@ -49,6 +51,18 @@ export class OrderInformation extends Document {
 
     @Prop({ type: Types.ObjectId, ref: "Dynamic" })
     dynamic: Types.ObjectId;
+
+    @Prop({ default: false })
+    view: boolean;
+
+    @Prop()
+    total?: number;
+
+    @Prop()
+    createdAt?: Date;
+
+    @Prop()
+    updatedAt?: Date;
 }
 
 export const OrderInfoSchema = SchemaFactory.createForClass(OrderInformation);

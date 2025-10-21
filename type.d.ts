@@ -34,7 +34,6 @@ type Order = {
     price: number;
 }
 
-
 type OrderInfo = {
     _id: string;
     fullname: string;
@@ -45,7 +44,7 @@ type OrderInfo = {
     user?: string;
     status: string;
     tracking?: string;
-    orders: Order[];
+    items: Order[];
     createdAt: string; // ISO date string
     updatedAt: string; // ISO date string
     dynamic: string;

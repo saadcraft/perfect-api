@@ -36,8 +36,8 @@ export class OrdersController {
     }
 
     @Get("info/:id")
-    findOne(@Param("id") id: string): Promise<OrderInformation | null> {
-        return this.ordersService.findByOrder(id);
+    findOne(@Param("id") id: string, @Query('view') view: boolean): Promise<OrderInformation | null> {
+        return this.ordersService.findByOrder(id, view);
     }
 
     // @Get("app")
