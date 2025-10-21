@@ -14,6 +14,9 @@ export enum Statue {
     timestamps: true,
 })
 export class OrderInformation extends Document {
+    @Prop({ required: true, unique: true })
+    orderId: string;
+
     @Prop({ required: false })
     fullname: string;
 
@@ -37,6 +40,9 @@ export class OrderInformation extends Document {
 
     @Prop({ type: [{ type: Types.ObjectId, ref: "Orders" }] })
     items: Types.ObjectId[];
+
+    @Prop({ required: true })
+    distance: number;
 
     @Prop({ type: Types.ObjectId, ref: "Profile", required: false })
     user: Types.ObjectId;

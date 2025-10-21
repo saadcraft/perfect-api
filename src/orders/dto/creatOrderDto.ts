@@ -100,6 +100,10 @@ export class orderInfoDto {
     @IsEmail()
     email: string;
 
+    @Transform(({ value }) => Number(value))
+    @IsNumber()
+    @IsNotEmpty()
+    distance: number;
 
     @IsArray()
     @ArrayMinSize(1, { message: 'At least one order is required' })

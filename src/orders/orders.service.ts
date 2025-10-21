@@ -188,7 +188,13 @@ export class OrdersService {
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limit)
-                .populate({ path: 'items', model: 'Orders' }),
+                .populate([{
+                    path: 'dynamic', model: 'Dynamic', populate: {
+                        path: 'common', model: 'Common'
+                    }
+                },
+                { path: 'items', model: 'Orders', select: 'quantity price' }]
+                ),
             this.OrderInfoModel.countDocuments(query)
         ]);
         return {

@@ -17,7 +17,6 @@ export class OrdersController {
     @Roles(Role.MAGASINE, Role.USER)
     @Get() //Get get all orders for ADMIN
     findByMagasine(@Req() req: Request, @Query('user') user: string, @Query('phoneNumber') number: string, @Query('status') status: string, @Query('page') page: number): Promise<OrderRequest | null> {
-        console.log(req.user);
         if (req.user && (req.user as PayloadType).role === Role.USER) {
             return this.ordersService.findByUser(req.user as PayloadType, { number, status }, page);
         }

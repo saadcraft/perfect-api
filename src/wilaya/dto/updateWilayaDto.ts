@@ -12,4 +12,5 @@ export class CreatWilayaDto {
     @IsNumber()
     @IsNotEmpty()
     prix_sd: number;
+
 }

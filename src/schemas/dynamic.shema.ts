@@ -22,7 +22,10 @@ export class Dynamic extends Document {
     address: string;
 
     @Prop({ type: [{ type: Types.ObjectId, ref: 'Categories' }], required: false })
-    categories: Types.ObjectId[]
+    categories: Types.ObjectId[];
+
+    @Prop({ type: Types.ObjectId, ref: 'Common', required: true })
+    common: Types.ObjectId;
 
     @Prop({ type: Types.ObjectId, ref: 'Users', required: true })
     owner: Types.ObjectId;

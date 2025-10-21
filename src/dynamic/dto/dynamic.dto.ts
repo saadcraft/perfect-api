@@ -1,5 +1,5 @@
 import { Type } from "class-transformer";
-import { IsArray, IsEmail, IsNotEmpty, IsString, ValidateNested } from "class-validator";
+import { IsArray, IsEmail, IsMongoId, IsNotEmpty, IsString, ValidateNested } from "class-validator";
 
 export class FqaDto {
     @IsNotEmpty()
@@ -30,6 +30,10 @@ export class DynamicDto {
     @IsNotEmpty()
     @IsEmail({}, { message: "Email dosn't much" })
     email: string;
+
+    @IsMongoId()
+    @IsNotEmpty()
+    common: string;
 
     @IsArray()
     @ValidateNested({ each: true })
