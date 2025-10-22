@@ -10,20 +10,25 @@ export enum Statue {
     RETURNED = 'Retour'
 }
 
+export type OrderWithTotal = OrderInformation & { total: number };
+
 @Schema({
     timestamps: true,
 })
 export class OrderInformation extends Document {
-    @Prop({ required: true })
+    @Prop({ required: true, unique: true })
+    orderId: string;
+
+    @Prop({ required: false })
     fullname: string;
 
     @Prop({ required: true })
     phoneNumber: string;
 
-    @Prop({ required: true })
+    @Prop({ required: false })
     wilaya: string;
 
-    @Prop({ required: true })
+    @Prop({ required: false })
     adresse: string;
 
     @Prop({ required: false })
@@ -36,10 +41,28 @@ export class OrderInformation extends Document {
     tracking: string;
 
     @Prop({ type: [{ type: Types.ObjectId, ref: "Orders" }] })
-    orders: Types.ObjectId[];
+    items: Types.ObjectId[];
 
-    @Prop({ type: Types.ObjectId, ref: "Users", required: false })
+    @Prop({ required: true })
+    distance: number;
+
+    @Prop({ type: Types.ObjectId, ref: "Profile", required: false })
     user: Types.ObjectId;
+
+    @Prop({ type: Types.ObjectId, ref: "Dynamic" })
+    dynamic: Types.ObjectId;
+
+    @Prop({ default: false })
+    view: boolean;
+
+    @Prop()
+    total?: number;
+
+    @Prop()
+    createdAt?: Date;
+
+    @Prop()
+    updatedAt?: Date;
 }
 
 export const OrderInfoSchema = SchemaFactory.createForClass(OrderInformation);

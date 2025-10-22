@@ -34,7 +34,8 @@ export class DynamicService {
     async findOne(id: string) {
         return this.DynamicModel.findById({ _id: id }).populate([
             { path: 'fqa', model: 'Fqa' },
-            { path: 'heroPictures', model: 'HeroPictures' }
+            { path: 'heroPictures', model: 'HeroPictures' },
+            { path: 'categories', model: 'Categories' }
         ]);
     }
 

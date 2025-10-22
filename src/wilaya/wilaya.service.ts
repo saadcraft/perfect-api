@@ -1,22 +1,26 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
-import { Wilayas } from 'src/schemas/wilayas.shema';
-import { WilayaDto } from './dto/creatWilayaDto';
+import { CreatCommonDto, CreateCityDto } from './dto/creatWilayaDto';
 import { CreatWilayaDto } from './dto/updateWilayaDto';
+import { Cities } from 'src/schemas/cities.shema';
+import { Common } from 'src/schemas/common.shema';
 
 export type WilayaRequest = {
     total: number;
     page: number;
     totalPages: number;
-    result: Wilayas[];
+    result: Cities[];
 }
 
 const limit = 20;
 
 @Injectable()
 export class WilayaService {
-    constructor(@InjectModel(Wilayas.name) readonly wilayaModule: mongoose.Model<Wilayas>) { }
+    constructor(
+        @InjectModel(Cities.name) readonly wilayaModule: mongoose.Model<Cities>,
+        @InjectModel(Common.name) readonly CommonModule: mongoose.Model<Common>
+    ) { }
 
     async findAll(filters: { wilaya?: number }, page?: number): Promise<WilayaRequest> {
         const skip = (page ? page - 1 : 0) * limit; // Calculate the offset
@@ -37,20 +41,32 @@ export class WilayaService {
         }
     }
 
-    async findOne(id: string): Promise<Wilayas | null> {
+    async findOne(id: string): Promise<Cities | null> {
         return this.wilayaModule.findById(id);
     }
 
-    async create(wilayas: WilayaDto[]): Promise<Wilayas[] | null> {
-
-        const createWilaya = await this.wilayaModule.insertMany(wilayas.map(wilaya => ({
-            ...wilaya
-        })));
-
-        return createWilaya;
+    async create(city: CreateCityDto): Promise<Cities | null> {
+        return this.wilayaModule.create(city);
     }
 
-    async update(id: string, body: CreatWilayaDto): Promise<Wilayas | null> {
+    async createCommon(common: CreatCommonDto): Promise<Common | null> {
+        const city = await this.wilayaModule.findById(common.city)
+        if (!city) {
+            throw new BadRequestException({
+                status: 400,
+                message: 'This wilaya didn\'t exist',
+                error: 'Bad Request',
+            });
+        }
+        const newCommon = await this.CommonModule.create({ ...common, city: new mongoose.Types.ObjectId(common.city) });
+
+        city.common = [...city.common, new mongoose.Types.ObjectId(newCommon._id as any)]
+
+        await city.save()
+        return newCommon
+    }
+
+    async update(id: string, body: CreatWilayaDto): Promise<Cities | null> {
         return this.wilayaModule.findByIdAndUpdate(id, body, { new: true })
     }
 

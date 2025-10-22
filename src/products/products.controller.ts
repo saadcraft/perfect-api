@@ -18,7 +18,7 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 import { ProductsService, ProductRequest } from "./products.service"
-import { CreateProductDto, VariantsDto } from "./dto/product.dto"
+import { CategoryDto, CreateProductDto, VariantsDto } from "./dto/product.dto"
 import { Products } from '../schemas/product.schema';
 import { UpdateProductDto, VariantUpdateDto } from './dto/update.dto';
 import mongoose from 'mongoose';
@@ -56,10 +56,18 @@ export class ProductsController {
         @Query('page') page: number,
         @Req() req: Request
     ): Promise<ProductRequest> {
-        if (req.user && (req.user as PayloadType).role === Role.USER) {
-            return this.productsService.findAll({ title, category }, dynamic, page);
-        }
         return this.productsService.findMagasinProduct(req.user as PayloadType, { title, category }, page)
+    }
+
+    @Post('variants')
+    findProductByVariant(@Body() body: { ids: string[] }) {
+        return this.productsService.variantFindProduct(body.ids)
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Get('category')
+    async getCat() {
+        return this.productsService.getCategories();
     }
 
     @Get(':id') // GET /products/:id
@@ -68,6 +76,7 @@ export class ProductsController {
         if (!isValid) throw new HttpException('Invalid ID', 400);
         return this.productsService.findOne(id)
     }
+
 
     @Get('variants/:id')
     findVariants(@Param("id") id: string): Promise<Variants[] | null> {
@@ -213,6 +222,13 @@ export class ProductsController {
 
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.ADMIN)
+    @Post('category')
+    async creatCat(@Body() data: CategoryDto) {
+        return this.productsService.creatCategorie(data);
+    }
+
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
     @Delete(':id')
     async delete(@Param('id') id: string) {
         const isValid = mongoose.Types.ObjectId.isValid(id);
@@ -221,5 +237,6 @@ export class ProductsController {
         if (!deleteUser) throw new HttpException('Product Not Found', 404);
         return;
     }
+
 
 }

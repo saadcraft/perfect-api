@@ -4,6 +4,8 @@ import { GlobalExceptionFilter } from './global.exception.filter';
 import { LoggingInterceptor } from './logging.interceptor';
 import { ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
+import { SocketAuthMiddleware } from './config/socket-auth.middleware';
+import { SocketIOAdapter } from './config/socket-io.adapter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -25,6 +27,12 @@ async function bootstrap() {
     },
     credentials: true,
   });
+
+  // Get the middleware instance
+  const authMiddleware = app.get(SocketAuthMiddleware);
+
+  // Use custom adapter with authentication
+  app.useWebSocketAdapter(new SocketIOAdapter(app, authMiddleware));
 
   await app.listen(8001, '0.0.0.0', () => {
     console.log('Server running on port 8001');
