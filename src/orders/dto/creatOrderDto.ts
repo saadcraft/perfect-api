@@ -1,5 +1,5 @@
 import { Transform, Type } from "class-transformer";
-import { ArrayMinSize, IsArray, IsEmail, IsMongoId, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator";
+import { ArrayMinSize, IsArray, IsEmail, IsMongoId, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateIf, ValidateNested } from "class-validator";
 import { AtLeastOneNotEmpty } from "src/config/at-least-one-not-empty.decorator";
 
 
@@ -57,7 +57,27 @@ export class OrderDto {
     price: number;
 }
 
+export class orderUserDto {
+
+    @IsMongoId()
+    id: string;
+
+    @IsString()
+    firstname: string;
+
+    @IsString()
+    lastname: string;
+
+}
+
 export class orderInfoDto {
+
+    @IsOptional()
+    @ValidateNested({ each: true })
+    @Type(() => orderUserDto)
+    user: orderUserDto;
+
+    @ValidateIf(o => !o.user)
     @IsString()
     @IsNotEmpty({ message: "le Nom et Prénom ne doit pas être vide" })
     fullname: string;
@@ -66,10 +86,12 @@ export class orderInfoDto {
     @IsNotEmpty({ message: "le Numéro ne doit pas être vide" })
     phoneNumber: string;
 
+    @ValidateIf(o => !o.user)
     @IsString()
     @IsNotEmpty({ message: "la Wilaya ne doit pas être vide" })
     wilaya: string;
 
+    @ValidateIf(o => !o.user)
     @IsString()
     @IsNotEmpty({ message: "l'adresse ne doit pas être vide" })
     adresse: string;
@@ -78,14 +100,19 @@ export class orderInfoDto {
     @IsEmail()
     email: string;
 
-    @IsOptional()
-    @IsMongoId()
-    user: string;
+    @Transform(({ value }) => Number(value))
+    @IsNumber()
+    @IsNotEmpty()
+    distance: number;
 
     @IsArray()
     @ArrayMinSize(1, { message: 'At least one order is required' })
     @ValidateNested({ each: true })
     // @Transform(({ value }) => Array(value))
     @Type(() => OrderDto)
-    orders: OrderDto[];
+    items: OrderDto[];
+
+    @IsMongoId()
+    @IsNotEmpty()
+    dynamic: string;
 }

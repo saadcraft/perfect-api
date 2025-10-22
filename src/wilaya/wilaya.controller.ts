@@ -5,8 +5,8 @@ import { JwtAuthGuard } from 'src/users/jwt/jwt-auth.guard';
 import { RolesGuard } from 'src/users/auth/role.guard';
 import { Roles } from 'src/users/auth/auth.decorator';
 import { Role } from 'src/schemas/user.schema';
-import { CreateWilayasDto } from './dto/creatWilayaDto';
 import { CreatWilayaDto } from './dto/updateWilayaDto';
+import { CreatCommonDto, CreateCityDto } from './dto/creatWilayaDto';
 
 @Controller('wilaya')
 export class WilayaController {
@@ -29,8 +29,15 @@ export class WilayaController {
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.ADMIN)
     @Post()
-    create(@Body() body: CreateWilayasDto) {
-        return this.wilayaService.create(body.wilayas);
+    create(@Body() body: CreateCityDto) {
+        return this.wilayaService.create(body);
+    }
+
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    @Post('common')
+    createCommon(@Body() body: CreatCommonDto) {
+        return this.wilayaService.createCommon(body);
     }
 
     @UseGuards(JwtAuthGuard, RolesGuard)

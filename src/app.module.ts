@@ -9,12 +9,18 @@ import { OrdersModule } from './orders/orders.module';
 import { WilayaModule } from './wilaya/wilaya.module';
 import { DynamicModule } from './dynamic/dynamic.module';
 import { SocketsModule } from './gateway/events.module';
+import { SocketAuthMiddleware } from './config/socket-auth.middleware';
+import { JwtModule } from '@nestjs/jwt';
 
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+    }),
+    JwtModule.register({
+      secret: process.env.SECRET_KEY || "DEFAULT=493156290a5d9b7e209b9952748961d0",
+      signOptions: { expiresIn: '1h' },
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'uploads'), // Serve the uploads folder
@@ -29,7 +35,7 @@ import { SocketsModule } from './gateway/events.module';
     SocketsModule
   ],
   controllers: [],
-  providers: [],
+  providers: [SocketAuthMiddleware],
 })
 export class AppModule {
   constructor(private readonly configService: ConfigService) {
