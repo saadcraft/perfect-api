@@ -40,4 +40,4 @@ jobs:
 
     - name: Change Directory
       run: cd /home/delivry/actions-runner/_work/perfect-api/perfect-api
-    - run: pm2 reload 0
+    - run: /home/delivry/.nvm/versions/node/v22.21.0/bin/pm2 reload 0
