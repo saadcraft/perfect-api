@@ -20,7 +20,7 @@ import { ConfigModule } from '@nestjs/config';
         PassportModule,
         JwtModule.register({
             secret: process.env.SECRET_KEY || "DEFAULT=493156290a5d9b7e209b9952748961d0",
-            signOptions: { expiresIn: '1h' },
+            signOptions: { expiresIn: '10m' },
         }),
         MongooseModule.forFeature([
             {

@@ -47,9 +47,8 @@ export class CreateProductDto {
     @IsOptional()
     description?: string;
 
-    @IsEnum(['foods', 'fétes', 'médical', 'beauty', 'sport', 'gaming'], {
-        message: 'Valid category required'
-    })
+    @IsString()
+    @IsMongoId()
     category: string;
 
     @Transform(({ value }) => Number(value))

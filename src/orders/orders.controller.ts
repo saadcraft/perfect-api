@@ -35,6 +35,7 @@ export class OrdersController {
         return this.ordersService.findByClient(num, page);
     }
 
+    @UseGuards(JwtAuthGuard)
     @Get("info/:id")
     findOne(@Param("id") id: string, @Query('view') view: boolean): Promise<OrderInformation | null> {
         return this.ordersService.findByOrder(id, view);
