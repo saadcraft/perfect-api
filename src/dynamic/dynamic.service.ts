@@ -62,7 +62,7 @@ export class DynamicService {
 
         await addDynamo.save();
 
-        await this.Usermodel.updateOne({ _id: userId }, { dynamics: addDynamo._id });
+        await this.Usermodel.updateOne({ _id: userId }, { dynamic: addDynamo._id });
 
         // Optionally update user document if needed
 
