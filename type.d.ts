@@ -3,7 +3,7 @@ type UsersType = {
     username?: string;
     email?: string;
     number: string;
-    role: 'ADMIN' | 'USER' | 'MAGASINE';
+    role: 'ADMIN' | 'USER' | 'MAGASINE' | 'DELIVERY';
     dynamics: string | null;
     profile: string | null;
 }
