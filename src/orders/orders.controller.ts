@@ -14,10 +14,10 @@ export class OrdersController {
     constructor(private readonly ordersService: OrdersService) { }
 
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(Role.MAGASINE, Role.USER)
+    @Roles(Role.MAGASINE, Role.USER, Role.DELIVERY)
     @Get() //Get get all orders for ADMIN
     findByMagasine(@Req() req: Request, @Query('user') user: string, @Query('phoneNumber') number: string, @Query('status') status: string, @Query('page') page: number): Promise<OrderRequest | null> {
-        if (req.user && (req.user as PayloadType).role === Role.USER) {
+        if (req.user && (req.user as PayloadType).role === Role.USER || Role.DELIVERY) {
             return this.ordersService.findByUser(req.user as PayloadType, { number, status }, page);
         }
         return this.ordersService.findByMagasine(req.user as PayloadType, { number, user, status }, page);

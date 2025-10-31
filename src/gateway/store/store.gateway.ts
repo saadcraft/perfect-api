@@ -2,13 +2,13 @@ import { InjectModel } from "@nestjs/mongoose";
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from "@nestjs/websockets";
 import { Model } from "mongoose";
 import { Socket, Server } from 'socket.io';
-import { OrderDto, orderInfoDto } from "src/orders/dto/creatOrderDto";
 import { OrderInformation } from "src/schemas/orderInfo.shema";
 
 @WebSocketGateway({
     cors: {
         origin: '*',
-    }
+    },
+    namespace: 'magasine'
 })
 export class StoreSocket {
 
@@ -19,7 +19,7 @@ export class StoreSocket {
     @WebSocketServer() server: Server;
 
     handleConnection(socket: Socket) {
-        console.log(`User ${socket.data.user?.email} connected with ID: ${socket.id}`);
+        console.log(`magasine ${socket.data.user?.email} connected with ID: ${socket.id}`);
 
         if (socket.data.user?.dynamic) {
             const magasinRoom = `magasin_${socket.data.user.dynamic}`;

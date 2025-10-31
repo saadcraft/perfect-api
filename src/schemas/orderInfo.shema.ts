@@ -2,12 +2,13 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 
 export enum Statue {
-    PANDING = 'En attente',
-    ACCEPTED = 'Accepté',
-    CANCELED = 'Annulé',
-    INWAY = 'En route',
-    DELIVRED = 'Livré',
-    RETURNED = 'Retour'
+    PANDING = 'en attente',
+    ACCEPTED = 'preparation',
+    CANCELED = 'annulé',
+    PICKUP = 'pickup',
+    INWAY = 'en route',
+    DELIVRED = 'completed',
+    RETURNED = 'retour'
 }
 
 export type OrderWithTotal = OrderInformation & { total: number };
@@ -34,7 +35,7 @@ export class OrderInformation extends Document {
     @Prop({ required: false })
     email: string;
 
-    @Prop({ default: "En attente" })
+    @Prop({ default: "en attente" })
     status: Statue;
 
     @Prop({ required: false })
