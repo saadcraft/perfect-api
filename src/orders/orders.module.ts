@@ -8,6 +8,7 @@ import { Orders, OrdersSchema } from 'src/schemas/orders.shema';
 import { ParsonalizerSchema, Parsonalizer } from 'src/schemas/personalizer';
 import { StoreModule } from 'src/gateway/store/store.module';
 import { Dynamic, DynamicSchema } from 'src/schemas/dynamic.shema';
+import { ClientModule } from 'src/gateway/client/client.module';
 
 @Module({
   imports: [MongooseModule.forFeature([
@@ -15,7 +16,7 @@ import { Dynamic, DynamicSchema } from 'src/schemas/dynamic.shema';
     { name: Orders.name, schema: OrdersSchema },
     { name: Parsonalizer.name, schema: ParsonalizerSchema },
     { name: Dynamic.name, schema: DynamicSchema },
-  ]), UsersModule, StoreModule],
+  ]), UsersModule, StoreModule, ClientModule],
   controllers: [OrdersController],
   providers: [OrdersService],
 })

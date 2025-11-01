@@ -33,7 +33,7 @@ export class StoreSocket {
                     // pendingOrders.forEach(order => {
                     //     this.server.to(magasinRoom).emit("order_created", order);
                     // });
-                    this.server.to(magasinRoom).emit("order_created", pendingOrders);
+                    this.server.to(magasinRoom).emit("order_created", { type: "init", data: pendingOrders });
                 });
 
 
@@ -52,12 +52,15 @@ export class StoreSocket {
         return data;
     }
 
-    // Helper method to notify from services
     notifyOrderCreated(order: OrderInformation) {
-
-        // console.log(order)
         const magasinRoom = `magasin_${order.dynamic}`;
-        this.server.to(magasinRoom).emit('order_created', order);
+        this.server.to(magasinRoom).emit('order_created', { type: "update", data: order });
+
+    }
+
+    notifyOrderClean(order: OrderInformation) {
+        const magasinRoom = `magasin_${order.dynamic}`;
+        this.server.to(magasinRoom).emit('order_created', { type: "delete", data: order });
 
     }
 }

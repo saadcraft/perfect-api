@@ -9,6 +9,7 @@ import { Parsonalizer } from 'src/schemas/personalizer';
 import { StoreSocket } from 'src/gateway/store/store.gateway';
 import { Dynamic } from 'src/schemas/dynamic.shema';
 import path from 'path';
+import { ClientSocket } from 'src/gateway/client/client.gateway';
 
 export type OrderRequest = {
     total: number;
@@ -27,7 +28,8 @@ export class OrdersService {
         @InjectModel(Orders.name) private readonly OrdersModel: mongoose.Model<Orders>,
         @InjectModel(Parsonalizer.name) private readonly PersonalizerModel: mongoose.Model<Parsonalizer>,
         @InjectModel(Dynamic.name) private readonly DynamicModel: mongoose.Model<Dynamic>,
-        private readonly storeSocket: StoreSocket
+        private readonly storeSocket: StoreSocket,
+        private readonly clientSocket: ClientSocket
     ) { }
 
     async findByClient(phoneNumber: string, page?: number): Promise<OrderRequest | null> {
@@ -72,13 +74,18 @@ export class OrdersService {
                     path: 'common'
                 }
             },
+            {
+                path: 'user',
+            }
         ]);
 
         if (!order) return null;
 
         if (view) {
-            order.view = view
-            order.save();
+            order.view = view;
+            await order.save();
+            const message = `${(order.dynamic as any)?.magasine} Voir votre commande`
+            this.clientSocket.notifyOrderUpdate(order, message);
         }
 
         return order;

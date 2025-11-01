@@ -6,6 +6,7 @@ import { OrderInformation, OrderInfoSchema } from "src/schemas/orderInfo.shema";
 
 @Module({
     imports: [MongooseModule.forFeature([{ name: OrderInformation.name, schema: OrderInfoSchema }])],
-    providers: [ClientSocket]
+    providers: [ClientSocket],
+    exports: [ClientSocket]
 })
 export class ClientModule { }
